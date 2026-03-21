@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BHAT NETWORK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bhat: {
+                            bg: '#F9F9F7',
+                            ink: '#1A1A1A',
+                            surface: '#FFFFFF',
+                            accent: '#C25E2A',
+                            muted: '#8C8C85',
+                            darkBg: '#121212',
+                            darkSurface: '#1E1E1E',
+                            darkInk: '#E0E0E0',
+                            darkAccent: '#00FFCC'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #F9F9F7;
+            color: #1A1A1A;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark body {
+            background-color: #121212;
+            color: #E0E0E0;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F9F9F7;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #121212;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D6D6D6;
+            border-radius: 10px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #333;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #A3A3A3;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .page {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+        .page.active {
+            display: block;
+        }
+
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        .ripple::after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, rgba(0,0,0,0.1) 10%, transparent 10.01%);
+            background-repeat: no-repeat;
+            background-position: 50%;
+            transform: scale(10, 10);
+            opacity: 0;
+            transition: transform .5s, opacity 1s;
+        }
+        .ripple:active::after {
+            transform: scale(0, 0);
+            opacity: .3;
+            transition: 0s;
+        }
+
+        .btn-dark.ripple::after {
+            background-image: radial-gradient(circle, rgba(255,255,255,0.2) 10%, transparent 10.01%);
+        }
+        
+        .nav-item.active {
+            color: #1A1A1A;
+        }
+        .nav-item.active i {
+            transform: translateY(-2px);
+            transition: transform 0.3s ease;
+        }
+
+        @keyframes whatsapp-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+            70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+        }
+        .whatsapp-float {
+            animation: whatsapp-pulse 2s infinite;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-stone-200 selection:text-bhat-ink">
+
+    <!-- Reactive Background Elements -->
+    <div id="reactive-bg" class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <i class="fas fa-wrench absolute text-stone-200/40 text-7xl top-[15%] left-[8%] floating-tool" data-speed="2"></i>
+        <i class="fas fa-cog absolute text-stone-200/30 text-9xl top-[65%] left-[4%] floating-tool" data-speed="-3"></i>
+        <i class="fas fa-screwdriver absolute text-stone-200/40 text-8xl top-[20%] right-[10%] floating-tool" data-speed="3.5" style="transform: rotate(45deg);"></i>
+        <i class="fas fa-hammer absolute text-stone-200/40 text-6xl top-[75%] right-[12%] floating-tool" data-speed="-2.5" style="transform: rotate(-15deg);"></i>
+        <i class="fas fa-cogs absolute text-stone-200/30 text-7xl top-[40%] left-[55%] floating-tool" data-speed="1.5"></i>
+        <i class="fas fa-toolbox absolute text-stone-200/40 text-5xl top-[85%] left-[35%] floating-tool" data-speed="-1.5"></i>
+        <i class="fas fa-circle-notch absolute text-stone-200/50 text-4xl top-[30%] left-[30%] floating-tool" data-speed="4"></i>
+        <i class="fas fa-bolt absolute text-stone-200/30 text-6xl top-[55%] right-[30%] floating-tool" data-speed="-2"></i>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader" class="fixed inset-0 z-50 flex items-center justify-center bg-bhat-bg transition-opacity duration-500">
+        <div class="text-center">
+            <div class="w-12 h-12 border-2 border-stone-200 border-t-bhat-ink rounded-full animate-spin mx-auto mb-6"></div>
+            <h2 class="text-xl font-serif font-bold text-bhat-ink tracking-widest uppercase">Bhat Network</h2>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-40 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-md border-b border-stone-200/60 dark:border-stone-800/60 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="text-lg font-serif font-bold text-bhat-ink dark:text-bhat-darkInk tracking-widest uppercase">Bhat <span class="text-stone-400 dark:text-stone-500 font-normal">Network</span></div>
+            <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-stone-500 dark:text-stone-400">
+                <button onclick="navigate('home')" class="hover:text-bhat-ink dark:hover:text-bhat-darkAccent transition-colors">Home</button>
+                <button onclick="navigate('explore')" class="hover:text-bhat-ink dark:hover:text-bhat-darkAccent transition-colors">Explore</button>
+                <button onclick="navigate('add')" class="hover:text-bhat-ink dark:hover:text-bhat-darkAccent transition-colors">Add Workshop</button>
+                <button onclick="navigate('profile')" class="hover:text-bhat-ink dark:hover:text-bhat-darkAccent transition-colors">Profile</button>
+                <button onclick="navigate('dashboard')" class="hover:text-bhat-ink dark:hover:text-bhat-darkAccent transition-colors">Dashboard</button>
+                <button onclick="navigate('creator')" class="hover:text-bhat-ink dark:hover:text-bhat-darkAccent transition-colors">Creator</button>
+                <button onclick="toggleDarkMode()" class="text-lg hover:text-bhat-ink dark:hover:text-bhat-darkAccent transition-colors ml-4" id="darkModeToggleBtn">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+            <div class="md:hidden flex items-center">
+                <button onclick="toggleDarkMode()" class="text-lg text-stone-500 dark:text-stone-400 hover:text-bhat-ink dark:hover:text-bhat-darkAccent transition-colors" id="darkModeToggleBtnMobile">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="pt-16 relative z-10">
+        <!-- Home Page -->
+        <section id="home" class="page active">
+            <div class="relative min-h-[75vh] flex items-center justify-center overflow-hidden">
+                <div class="absolute inset-0 z-0 opacity-[0.07] bg-[url('https://images.unsplash.com/photo-1625047509168-a71c6f959828?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center bg-fixed parallax-bg grayscale"></div>
+                <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bhat-bg z-0"></div>
+                
+                <div class="relative z-10 text-center px-4 max-w-3xl mx-auto hero-content mt-10">
+                    <span class="inline-block py-1.5 px-4 rounded-full bg-white border border-stone-200 text-stone-600 text-xs font-semibold tracking-wider uppercase mb-8 shadow-sm">
+                        Kashmir's First Mechanic Network
+                    </span>
+                    <h1 class="text-5xl md:text-7xl font-serif font-medium mb-6 leading-[1.1] text-bhat-ink">
+                        Connect. Compete.<br><span class="italic text-stone-500">Grow.</span>
+                    </h1>
+                    <p class="text-stone-500 text-lg mb-10 max-w-xl mx-auto font-light leading-relaxed">
+                        A curated platform connecting skilled mechanics, premium workshops, and customers across the valley.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="navigate('add')" class="ripple btn-dark bg-bhat-ink text-white px-8 py-3.5 rounded-full font-medium text-sm hover:bg-stone-800 transition-all shadow-md hover:shadow-lg">
+                            Join the Network
+                        </button>
+                        <button onclick="navigate('explore')" class="ripple bg-white border border-stone-200 text-bhat-ink px-8 py-3.5 rounded-full font-medium text-sm hover:bg-stone-50 transition-all shadow-sm">
+                            Explore Workshops
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="max-w-7xl mx-auto px-6 py-12">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div class="bg-white border border-stone-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] p-6 rounded-3xl text-center" data-aos="fade-up" data-aos-delay="0">
+                        <div class="text-4xl font-serif font-medium text-bhat-ink mb-1 counter" data-target="150">0</div>
+                        <div class="text-[10px] text-stone-400 font-semibold uppercase tracking-widest">Workshops</div>
+                    </div>
+                    <div class="bg-white border border-stone-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] p-6 rounded-3xl text-center" data-aos="fade-up" data-aos-delay="100">
+                        <div class="text-4xl font-serif font-medium text-bhat-ink mb-1 counter" data-target="500">0</div>
+                        <div class="text-[10px] text-stone-400 font-semibold uppercase tracking-widest">Mechanics</div>
+                    </div>
+                    <div class="bg-white border border-stone-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] p-6 rounded-3xl text-center" data-aos="fade-up" data-aos-delay="200">
+                        <div class="text-4xl font-serif font-medium text-bhat-ink mb-1 counter" data-target="10000">0</div>
+                        <div class="text-[10px] text-stone-400 font-semibold uppercase tracking-widest">Customers</div>
+                    </div>
+                    <div class="bg-white border border-stone-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] p-6 rounded-3xl text-center" data-aos="fade-up" data-aos-delay="300">
+                        <div class="text-4xl font-serif font-medium text-bhat-ink mb-1 counter" data-target="50">0</div>
+                        <div class="text-[10px] text-stone-400 font-semibold uppercase tracking-widest">Locations</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Workshop -->
+            <div class="max-w-7xl mx-auto px-6 py-16">
+                <div class="flex items-center justify-between mb-10">
+                    <h2 class="text-3xl font-serif font-medium text-bhat-ink">Featured <span class="italic text-stone-400">Workshop</span></h2>
+                    <div class="h-[1px] flex-1 bg-stone-200 ml-6"></div>
+                </div>
+
+                <div class="bg-white border border-stone-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-[2rem] overflow-hidden relative group" data-aos="fade-up">
+                    <div class="grid md:grid-cols-2 gap-0">
+                        <div class="relative h-72 md:h-full overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=1000&auto=format&fit=crop" alt="Aashaq Bike Point" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000">
+                            <div class="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-bold text-bhat-ink tracking-wider uppercase flex items-center gap-2 shadow-sm">
+                                <i class="fas fa-star text-amber-500"></i> Editor's Choice
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-center p-8 md:p-12">
+                            <h3 class="text-4xl font-serif font-medium mb-3 text-bhat-ink">Aashaq Bike Point</h3>
+                            <p class="text-stone-500 text-sm mb-8 flex items-center gap-2 font-medium">
+                                <i class="fas fa-map-marker-alt text-stone-300"></i> Villagam, Kashmir
+                            </p>
+                            
+                            <div class="space-y-3 mb-10">
+                                <div class="flex items-center gap-4 bg-stone-50 border border-stone-100 p-4 rounded-2xl">
+                                    <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-stone-600">
+                                        <i class="fas fa-phone-alt text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] text-stone-400 uppercase tracking-wider font-semibold">Contact</div>
+                                        <div class="font-medium text-bhat-ink text-sm">099065 84655</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 bg-stone-50 border border-stone-100 p-4 rounded-2xl">
+                                    <div class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-stone-600">
+                                        <i class="fas fa-clock text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] text-stone-400 uppercase tracking-wider font-semibold">Timings</div>
+                                        <div class="font-medium text-bhat-ink text-sm">10 AM – 10 PM <span class="text-red-400 text-xs ml-1 font-normal">(Closed Friday)</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <a href="tel:+919906584655" class="ripple bg-white border border-stone-200 hover:bg-stone-50 transition-all p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-xs font-semibold text-bhat-ink group/btn shadow-sm">
+                                    <i class="fas fa-phone text-stone-400 group-hover/btn:text-bhat-ink transition-colors"></i>
+                                    Call
+                                </a>
+                                <a href="https://g.co/kgs/jH8xfRi" target="_blank" class="ripple bg-white border border-stone-200 hover:bg-stone-50 transition-all p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-xs font-semibold text-bhat-ink group/btn shadow-sm">
+                                    <i class="fas fa-directions text-stone-400 group-hover/btn:text-blue-500 transition-colors"></i>
+                                    Directions
+                                </a>
+                                <a href="https://youtube.com/@aashaqbikepoint?si=XMJbbCSTaWaL7yU8" target="_blank" class="ripple bg-white border border-stone-200 hover:bg-stone-50 transition-all p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-xs font-semibold text-bhat-ink group/btn shadow-sm">
+                                    <i class="fab fa-youtube text-stone-400 group-hover/btn:text-red-500 transition-colors"></i>
+                                    YouTube
+                                </a>
+                                <a href="https://www.instagram.com/aashaq_bike_point_villagam" target="_blank" class="ripple bg-white border border-stone-200 hover:bg-stone-50 transition-all p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-xs font-semibold text-bhat-ink group/btn shadow-sm">
+                                    <i class="fab fa-instagram text-stone-400 group-hover/btn:text-pink-500 transition-colors"></i>
+                                    Instagram
+                                </a>
+                            </div>
+                            
+                            <button onclick="toggleFollow('aashaq-bike-point')" id="btn-follow-aashaq-bike-point" class="mt-6 w-full ripple bg-white border border-stone-200 text-bhat-ink hover:bg-stone-50 transition-all p-4 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-sm text-sm">
+                                <i class="far fa-heart"></i> <span id="follow-text-aashaq-bike-point">Follow Workshop</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Explore Page -->
+        <section id="explore" class="page">
+            <div class="max-w-7xl mx-auto px-6 py-8">
+                <h2 class="text-3xl font-serif font-medium mb-8 text-bhat-ink" data-aos="fade-right">Explore <span class="italic text-stone-400">Workshops</span></h2>
+                
+                <div class="bg-white border border-stone-200 shadow-sm p-2 rounded-2xl flex items-center mb-10 sticky top-20 z-30" data-aos="fade-up">
+                    <i class="fas fa-search text-stone-400 ml-4"></i>
+                    <input type="text" id="searchInput" placeholder="Search by name, location, or service..." class="bg-transparent border-none outline-none text-bhat-ink w-full p-3 placeholder-stone-400 text-sm">
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="workshopsGrid">
+                    <!-- Cards injected via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Add Workshop Page -->
+        <section id="add" class="page">
+            <div class="max-w-2xl mx-auto px-6 py-12">
+                <div class="text-center mb-12" data-aos="fade-down">
+                    <h2 class="text-3xl font-serif font-medium mb-3 text-bhat-ink">Register <span class="italic text-stone-400">Workshop</span></h2>
+                    <p class="text-stone-500 text-sm">Join the network and elevate your business presence.</p>
+                </div>
+
+                <form id="addWorkshopForm" class="bg-white border border-stone-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] p-8 md:p-10 rounded-[2rem] space-y-6" data-aos="fade-up">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-semibold text-stone-500 uppercase tracking-wider pl-1">Workshop Name</label>
+                            <input type="text" id="wName" required class="w-full bg-stone-50 border border-stone-200 rounded-2xl p-3.5 text-bhat-ink text-sm focus:border-bhat-ink focus:ring-1 focus:ring-bhat-ink outline-none transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-semibold text-stone-500 uppercase tracking-wider pl-1">Owner Name</label>
+                            <input type="text" id="wOwner" required class="w-full bg-stone-50 border border-stone-200 rounded-2xl p-3.5 text-bhat-ink text-sm focus:border-bhat-ink focus:ring-1 focus:ring-bhat-ink outline-none transition-all">
+                        </div>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-semibold text-stone-500 uppercase tracking-wider pl-1">Phone Number</label>
+                            <input type="tel" id="wPhone" required class="w-full bg-stone-50 border border-stone-200 rounded-2xl p-3.5 text-bhat-ink text-sm focus:border-bhat-ink focus:ring-1 focus:ring-bhat-ink outline-none transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-semibold text-stone-500 uppercase tracking-wider pl-1">Location</label>
+                            <input type="text" id="wLocation" required class="w-full bg-stone-50 border border-stone-200 rounded-2xl p-3.5 text-bhat-ink text-sm focus:border-bhat-ink focus:ring-1 focus:ring-bhat-ink outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-semibold text-stone-500 uppercase tracking-wider pl-1">Services Offered (comma separated)</label>
+                        <textarea id="wServices" required rows="3" class="w-full bg-stone-50 border border-stone-200 rounded-2xl p-3.5 text-bhat-ink text-sm focus:border-bhat-ink focus:ring-1 focus:ring-bhat-ink outline-none transition-all resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full ripple btn-dark bg-bhat-ink text-white font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 transition-all shadow-md mt-4">
+                        Submit Registration
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Profile Page -->
+        <section id="profile" class="page">
+            <div class="max-w-2xl mx-auto px-6 py-12">
+                <div class="bg-white border border-stone-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] p-10 rounded-[2rem] mb-10 text-center relative overflow-hidden" data-aos="fade-down">
+                    <div class="relative z-10">
+                        <div class="relative w-24 h-24 mx-auto mb-5 group cursor-pointer" onclick="document.getElementById('profilePhotoInput').click()">
+                            <div id="profilePhotoContainer" class="w-full h-full bg-stone-50 border border-stone-200 rounded-full flex items-center justify-center text-3xl text-stone-300 overflow-hidden">
+                                <i class="fas fa-user" id="profileIcon"></i>
+                                <img id="profileImage" src="" class="w-full h-full object-cover hidden">
+                            </div>
+                            <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="fas fa-camera text-white"></i>
+                            </div>
+                            <input type="file" id="profilePhotoInput" class="hidden" accept="image/*" onchange="handleProfilePhotoUpload(event)">
+                        </div>
+                        <div class="flex items-center justify-center gap-3 mb-2">
+                            <h2 class="text-3xl font-serif font-medium text-bhat-ink" id="profileNameDisplay">Guest User</h2>
+                            <button onclick="editProfileName()" class="text-stone-400 hover:text-bhat-ink transition-colors text-sm"><i class="fas fa-edit"></i></button>
+                        </div>
+                        <p class="text-stone-400 text-xs uppercase tracking-widest font-semibold">Member since 2026</p>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-serif font-medium mb-6 flex items-center gap-2 text-bhat-ink" data-aos="fade-right">
+                    <i class="fas fa-bookmark text-stone-300 text-sm"></i> Saved Workshops
+                </h3>
+                
+                <div id="followedList" class="space-y-3" data-aos="fade-up">
+                    <div class="text-center text-stone-400 py-10 text-sm bg-white border border-stone-100 border-dashed rounded-3xl" id="emptyFollowed">
+                        You haven't saved any workshops yet.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Page -->
+        <section id="dashboard" class="page">
+            <div class="max-w-4xl mx-auto px-6 py-12">
+                <div class="text-center mb-12" data-aos="fade-down">
+                    <h2 class="text-3xl font-serif font-medium mb-3 text-bhat-ink dark:text-bhat-darkInk">Mechanic <span class="italic text-stone-400 dark:text-bhat-darkAccent">Dashboard</span></h2>
+                    <p class="text-stone-500 dark:text-stone-400 text-sm">Manage your workshops, appointments, and status.</p>
+                </div>
+
+                <div id="dashboardLogin" class="bg-white dark:bg-bhat-darkSurface border border-stone-100 dark:border-stone-800 shadow-[0_8px_30px_rgba(0,0,0,0.03)] p-8 md:p-10 rounded-[2rem] max-w-md mx-auto text-center" data-aos="fade-up">
+                    <div class="w-16 h-16 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-6 border border-stone-100 dark:border-stone-700">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3 class="text-xl font-serif font-medium mb-4 text-bhat-ink dark:text-bhat-darkInk">Owner Login</h3>
+                    <p class="text-sm text-stone-500 dark:text-stone-400 mb-6">Enter your phone number to access your dashboard.</p>
+                    <input type="tel" id="mechanicPhoneInput" class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent focus:ring-1 focus:ring-bhat-ink dark:focus:ring-bhat-darkAccent outline-none transition-all mb-6" placeholder="e.g. 099065 84655">
+                    <button onclick="loginMechanic()" class="w-full ripple btn-dark bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-all shadow-md">
+                        Login
+                    </button>
+                </div>
+
+                <div id="dashboardContent" class="hidden space-y-8" data-aos="fade-up">
+                    <!-- Dashboard content injected via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Creator Page -->
+        <section id="creator" class="page">
+            <div class="max-w-2xl mx-auto px-6 py-12 relative">
+                <!-- Local reactive elements -->
+                <i class="fas fa-laptop-code absolute text-stone-200/40 text-6xl top-10 left-0 floating-tool" data-speed="1.5"></i>
+                <i class="fas fa-paint-brush absolute text-stone-200/30 text-5xl bottom-20 right-0 floating-tool" data-speed="-1.5"></i>
+                <i class="fas fa-code-branch absolute text-stone-200/40 text-7xl top-1/2 left-[-10%] floating-tool" data-speed="2.5"></i>
+                <i class="fas fa-terminal absolute text-stone-200/30 text-6xl top-1/3 right-[-5%] floating-tool" data-speed="-2"></i>
+                
+                <div class="text-center mb-12" data-aos="fade-down">
+                    <h2 class="text-3xl font-serif font-medium mb-3 text-bhat-ink">Creator <span class="italic text-stone-400">Wall</span></h2>
+                    <p class="text-stone-500 text-sm">Meet the architect behind the network.</p>
+                </div>
+
+                <div class="bg-white border border-stone-100 shadow-[0_8px_30px_rgba(0,0,0,0.03)] p-10 rounded-[2rem] text-center relative overflow-hidden" data-aos="fade-up">
+                    <div class="w-24 h-24 bg-stone-50 border border-stone-200 rounded-full mx-auto mb-5 flex items-center justify-center text-3xl text-bhat-ink shadow-inner">
+                        <i class="fas fa-user-ninja"></i>
+                    </div>
+                    <h3 class="text-3xl font-serif font-bold text-bhat-ink mb-2">BHAT BOYKA</h3>
+                    <p class="text-stone-400 text-xs uppercase tracking-widest font-semibold mb-8">Website Architect</p>
+                    
+                    <a href="https://youtube.com/@aathir_hussain_bhat.?si=XnvDwjGygCX3V6Cx" target="_blank" class="inline-flex items-center justify-center gap-2 bg-red-50 text-red-600 border border-red-100 hover:bg-red-100 transition-colors px-6 py-3 rounded-full font-medium text-sm shadow-sm group">
+                        <i class="fab fa-youtube text-lg group-hover:scale-110 transition-transform"></i>
+                        Follow on YouTube
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-white/90 dark:bg-[#121212]/90 backdrop-blur-lg border-t border-stone-200 dark:border-stone-800 z-40 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.02)] transition-colors duration-300">
+        <div class="flex justify-around items-center h-16 px-1 overflow-x-auto">
+            <button onclick="navigate('home')" class="nav-item active flex flex-col items-center justify-center min-w-[60px] h-full text-stone-400 dark:text-stone-500 transition-colors" data-target="home">
+                <i class="fas fa-home text-[1.1rem] mb-1"></i>
+                <span class="text-[9px] font-semibold uppercase tracking-wider">Home</span>
+            </button>
+            <button onclick="navigate('explore')" class="nav-item flex flex-col items-center justify-center min-w-[60px] h-full text-stone-400 dark:text-stone-500 transition-colors" data-target="explore">
+                <i class="fas fa-compass text-[1.1rem] mb-1"></i>
+                <span class="text-[9px] font-semibold uppercase tracking-wider">Explore</span>
+            </button>
+            <button onclick="navigate('add')" class="nav-item flex flex-col items-center justify-center min-w-[60px] h-full text-stone-400 dark:text-stone-500 transition-colors" data-target="add">
+                <i class="fas fa-plus text-[1.1rem] mb-1"></i>
+                <span class="text-[9px] font-semibold uppercase tracking-wider">Add</span>
+            </button>
+            <button onclick="navigate('dashboard')" class="nav-item flex flex-col items-center justify-center min-w-[60px] h-full text-stone-400 dark:text-stone-500 transition-colors" data-target="dashboard">
+                <i class="fas fa-tachometer-alt text-[1.1rem] mb-1"></i>
+                <span class="text-[9px] font-semibold uppercase tracking-wider">Dash</span>
+            </button>
+            <button onclick="navigate('profile')" class="nav-item flex flex-col items-center justify-center min-w-[60px] h-full text-stone-400 dark:text-stone-500 transition-colors" data-target="profile">
+                <i class="fas fa-user text-[1.1rem] mb-1"></i>
+                <span class="text-[9px] font-semibold uppercase tracking-wider">Profile</span>
+            </button>
+            <button onclick="navigate('creator')" class="nav-item flex flex-col items-center justify-center min-w-[60px] h-full text-stone-400 dark:text-stone-500 transition-colors" data-target="creator">
+                <i class="fas fa-code text-[1.1rem] mb-1"></i>
+                <span class="text-[9px] font-semibold uppercase tracking-wider">Creator</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-bhat-ink/40 dark:bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-bhat-darkSurface p-10 rounded-[2rem] max-w-sm w-full mx-6 text-center transform scale-95 transition-transform duration-300 shadow-2xl" id="editProfileContent">
+            <div class="w-16 h-16 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-6 border border-stone-100 dark:border-stone-700">
+                <i class="fas fa-user-edit"></i>
+            </div>
+            <h3 class="text-2xl font-serif font-medium mb-4 text-bhat-ink dark:text-bhat-darkInk">Edit Profile</h3>
+            <input type="text" id="editNameInput" onkeypress="if(event.key === 'Enter') saveProfileName()" class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent focus:ring-1 focus:ring-bhat-ink dark:focus:ring-bhat-darkAccent outline-none transition-all mb-8" placeholder="Enter your name">
+            <div class="flex gap-3">
+                <button onclick="closeEditProfileModal()" class="flex-1 bg-white dark:bg-bhat-darkSurface border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 font-medium text-sm py-3.5 rounded-full hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm">
+                    Cancel
+                </button>
+                <button onclick="saveProfileName()" class="flex-1 bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm py-3.5 rounded-full hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-colors shadow-md">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 z-50 flex items-center justify-center bg-bhat-ink/40 dark:bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-bhat-darkSurface p-10 rounded-[2rem] max-w-sm w-full mx-6 text-center transform scale-95 transition-transform duration-300 shadow-2xl" id="modalContent">
+            <div class="w-16 h-16 bg-green-50 dark:bg-green-900/30 text-green-500 dark:text-green-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-6 border border-green-100 dark:border-green-800">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3 class="text-2xl font-serif font-medium mb-2 text-bhat-ink dark:text-bhat-darkInk">Success</h3>
+            <p class="text-stone-500 dark:text-stone-400 text-sm mb-8 font-light" id="modalMessage">Workshop registered successfully.</p>
+            <button onclick="closeModal()" class="w-full bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm py-3.5 rounded-full hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-colors shadow-md">
+                Continue
+            </button>
+        </div>
+    </div>
+
+    <!-- Workshop Detail Modal -->
+    <div id="workshopDetailModal" class="fixed inset-0 z-50 flex items-center justify-center bg-bhat-ink/60 dark:bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 p-4">
+        <div class="bg-white dark:bg-bhat-darkSurface rounded-[2rem] max-w-2xl w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300 shadow-2xl relative" id="workshopDetailContent">
+            <button onclick="closeWorkshopDetailModal()" class="absolute top-4 right-4 w-10 h-10 bg-white/50 dark:bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-bhat-ink dark:text-white z-10 hover:bg-white dark:hover:bg-black transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="workshopDetailBody">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Workshop Modal -->
+    <div id="editWorkshopModal" class="fixed inset-0 z-50 flex items-center justify-center bg-bhat-ink/60 dark:bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 p-4">
+        <div class="bg-white dark:bg-bhat-darkSurface p-8 md:p-10 rounded-[2rem] max-w-2xl w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300 shadow-2xl relative" id="editWorkshopContent">
+            <button onclick="closeEditWorkshopModal()" class="absolute top-4 right-4 w-8 h-8 text-stone-400 hover:text-bhat-ink dark:hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 class="text-2xl font-serif font-medium mb-6 text-bhat-ink dark:text-bhat-darkInk">Edit Workshop Details</h3>
+            
+            <form id="editWorkshopForm" class="space-y-6">
+                <input type="hidden" id="editWId">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Workshop Name</label>
+                        <input type="text" id="editWName" required class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Owner Name</label>
+                        <input type="text" id="editWOwner" required class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all">
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Phone Number</label>
+                        <input type="tel" id="editWPhone" required class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all" readonly title="Phone number cannot be changed">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Location</label>
+                        <input type="text" id="editWLocation" required class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Services Offered (comma separated)</label>
+                    <textarea id="editWServices" required rows="3" class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all resize-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full ripple btn-dark bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-all shadow-md mt-4">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Booking Modal -->
+    <div id="bookingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-bhat-ink/60 dark:bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 p-4">
+        <div class="bg-white dark:bg-bhat-darkSurface p-8 md:p-10 rounded-[2rem] max-w-md w-full transform scale-95 transition-transform duration-300 shadow-2xl relative" id="bookingContent">
+            <button onclick="closeBookingModal()" class="absolute top-4 right-4 w-8 h-8 text-stone-400 hover:text-bhat-ink dark:hover:text-white transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 class="text-2xl font-serif font-medium mb-2 text-bhat-ink dark:text-bhat-darkInk">Book Appointment</h3>
+            <p class="text-stone-500 dark:text-stone-400 text-sm mb-6 font-light" id="bookingWorkshopName"></p>
+            
+            <form id="bookingForm" class="space-y-4">
+                <input type="hidden" id="bookingWorkshopId">
+                <div class="space-y-1">
+                    <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Date</label>
+                    <input type="date" id="bookingDate" required class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Time</label>
+                    <input type="time" id="bookingTime" required class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Vehicle Details (Optional)</label>
+                    <input type="text" id="bookingVehicle" class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all" placeholder="e.g. Royal Enfield Classic 350">
+                </div>
+                <button type="submit" class="w-full ripple btn-dark bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-all shadow-md mt-4">
+                    Confirm Booking
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        let currentUser = localStorage.getItem('bhat_user') || 'Guest User';
+        let followedWorkshops = JSON.parse(localStorage.getItem('bhat_followed')) || [];
+        let isDarkMode = localStorage.getItem('bhat_dark_mode') === 'true';
+        let mechanicLoggedIn = localStorage.getItem('bhat_mechanic_logged_in') === 'true';
+        let mechanicPhone = localStorage.getItem('bhat_mechanic_phone') || '';
+        let bookings = JSON.parse(localStorage.getItem('bhat_bookings')) || [];
+        let profilePhoto = localStorage.getItem('bhat_profile_photo');
+
+        // Apply dark mode initially
+        if (isDarkMode) {
+            document.documentElement.classList.add('dark');
+        }
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('bhat_dark_mode', isDarkMode);
+            if (isDarkMode) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        
+        const workshopsDB = [
+            { id: 'aashaq-bike-point', name: 'Aashaq Bike Point', location: 'Villagam', phone: '099065 84655', services: ['Repair', 'Service', 'Parts'], rating: 5.0, image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=500&auto=format&fit=crop' },
+            { id: 'ws-2', name: 'Royal Enfield Masters', location: 'Srinagar', phone: '9876543210', services: ['Engine Rebuild', 'Customization'], rating: 4.8, image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=500&auto=format&fit=crop' },
+            { id: 'ws-3', name: 'Valley Auto Care', location: 'Anantnag', phone: '9876543211', services: ['Car Wash', 'Detailing', 'Oil Change'], rating: 4.5, image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=500&auto=format&fit=crop' },
+            { id: 'ws-4', name: 'Speed Moto Tech', location: 'Baramulla', phone: '9876543212', services: ['Diagnostics', 'Electrical'], rating: 4.7, image: 'https://images.unsplash.com/photo-1625047509168-a71c6f959828?q=80&w=500&auto=format&fit=crop' },
+        ];
+
+        const userWorkshops = JSON.parse(localStorage.getItem('bhat_user_workshops')) || [];
+        const allWorkshops = [...workshopsDB, ...userWorkshops];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            AOS.init({
+                duration: 800,
+                once: true,
+                offset: 30
+            });
+
+            setTimeout(() => {
+                const loader = document.getElementById('loader');
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+                
+                gsap.from(".hero-content > *", {
+                    y: 20,
+                    opacity: 0,
+                    duration: 1,
+                    stagger: 0.15,
+                    ease: "power2.out"
+                });
+            }, 800);
+
+            document.getElementById('profileNameDisplay').textContent = currentUser;
+            
+            if (profilePhoto) {
+                document.getElementById('profileIcon').classList.add('hidden');
+                const img = document.getElementById('profileImage');
+                img.src = profilePhoto;
+                img.classList.remove('hidden');
+            }
+            
+            renderWorkshops(allWorkshops);
+            renderFollowed();
+            updateFollowButtonState('aashaq-bike-point');
+
+            const counters = document.querySelectorAll('.counter');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const target = +entry.target.getAttribute('data-target');
+                        gsap.to(entry.target, {
+                            innerHTML: target,
+                            duration: 2,
+                            snap: { innerHTML: 1 },
+                            ease: "power1.inOut",
+                            onUpdate: function() {
+                                entry.target.innerHTML = Math.round(this.targets()[0].innerHTML) + (target > 1000 ? '+' : '');
+                            }
+                        });
+                        observer.unobserve(entry.target);
+                    }
+                });
+            });
+            counters.forEach(c => observer.observe(c));
+
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = allWorkshops.filter(w => 
+                    w.name.toLowerCase().includes(term) || 
+                    w.location.toLowerCase().includes(term) ||
+                    w.services.some(s => s.toLowerCase().includes(term))
+                );
+                renderWorkshops(filtered);
+            });
+
+            document.getElementById('addWorkshopForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const phoneVal = document.getElementById('wPhone').value.trim();
+                
+                const existing = allWorkshops.find(w => w.phone.replace(/\s/g, '') === phoneVal.replace(/\s/g, ''));
+                if (existing) {
+                    alert("A workshop with this phone number is already registered. Please use the dashboard to manage it.");
+                    return;
+                }
+
+                const newWorkshop = {
+                    id: 'user-ws-' + Date.now(),
+                    name: document.getElementById('wName').value,
+                    owner: document.getElementById('wOwner').value,
+                    phone: document.getElementById('wPhone').value,
+                    location: document.getElementById('wLocation').value,
+                    services: document.getElementById('wServices').value.split(',').map(s => s.trim()),
+                    rating: 5.0,
+                    image: 'https://images.unsplash.com/photo-1613214149922-f1809c99b414?q=80&w=500&auto=format&fit=crop'
+                };
+
+                userWorkshops.push(newWorkshop);
+                localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                allWorkshops.push(newWorkshop);
+                
+                e.target.reset();
+                showModal('Workshop registered successfully! It is now live on the network.');
+                renderWorkshops(allWorkshops);
+            });
+        });
+
+        function navigate(pageId) {
+            document.querySelectorAll('.page').forEach(p => {
+                p.classList.remove('active');
+                gsap.to(p, {opacity: 0, duration: 0.2});
+            });
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const activeNavs = document.querySelectorAll(`.nav-item[data-target="${pageId}"]`);
+            activeNavs.forEach(n => n.classList.add('active'));
+
+            const target = document.getElementById(pageId);
+            target.classList.add('active');
+            gsap.fromTo(target, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.4, ease: "power2.out"});
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if(pageId === 'profile') renderFollowed();
+            if(pageId === 'explore') renderWorkshops(allWorkshops);
+        }
+
+        function renderWorkshops(workshops) {
+            const grid = document.getElementById('workshopsGrid');
+            grid.innerHTML = '';
+            
+            if(workshops.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center text-stone-400 py-10 text-sm">No workshops found.</div>';
+                return;
+            }
+
+            workshops.forEach((w, index) => {
+                const isFollowed = followedWorkshops.includes(w.id);
+                const card = document.createElement('div');
+                card.className = 'bg-white dark:bg-bhat-darkSurface border border-stone-100 dark:border-stone-800 shadow-[0_4px_20px_rgba(0,0,0,0.02)] rounded-3xl overflow-hidden group flex flex-col';
+                card.setAttribute('data-aos', 'fade-up');
+                card.setAttribute('data-aos-delay', (index % 3) * 100);
+                
+                card.innerHTML = `
+                    <div class="h-48 overflow-hidden relative cursor-pointer" onclick="openWorkshopDetail('${w.id}')">
+                        <img src="${w.image}" alt="${w.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute top-4 right-4 bg-white/90 dark:bg-black/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 text-bhat-ink dark:text-white shadow-sm">
+                            <i class="fas fa-star text-amber-500"></i> ${w.rating}
+                        </div>
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                            <span class="opacity-0 group-hover:opacity-100 bg-white/90 dark:bg-black/90 text-bhat-ink dark:text-white text-xs font-bold px-3 py-1.5 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-sm">View Details</span>
+                        </div>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-serif font-medium mb-1 truncate text-bhat-ink dark:text-bhat-darkInk">${w.name}</h3>
+                        <p class="text-stone-500 dark:text-stone-400 text-xs mb-5 flex items-center gap-1.5 font-medium"><i class="fas fa-map-marker-alt text-stone-300 dark:text-stone-600"></i> ${w.location}</p>
+                        <div class="flex flex-wrap gap-2 mb-6 flex-1">
+                            ${w.services.slice(0,3).map(s => `<span class="text-[10px] font-medium uppercase tracking-wider bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700 px-2 py-1 rounded-md text-stone-500 dark:text-stone-400">${s}</span>`).join('')}
+                            ${w.services.length > 3 ? `<span class="text-[10px] font-medium uppercase tracking-wider bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700 px-2 py-1 rounded-md text-stone-500 dark:text-stone-400">+${w.services.length - 3}</span>` : ''}
+                        </div>
+                        <div class="flex gap-2 mb-3">
+                            <a href="tel:${w.phone}" class="flex-1 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-100 dark:border-stone-700 transition-colors text-center py-2.5 rounded-xl text-xs font-semibold text-bhat-ink dark:text-bhat-darkInk">
+                                <i class="fas fa-phone text-stone-400 dark:text-stone-500 mr-1"></i> Call
+                            </a>
+                            <button onclick="toggleFollow('${w.id}')" id="btn-follow-${w.id}" class="w-11 h-11 rounded-xl flex items-center justify-center transition-colors border ${isFollowed ? 'bg-red-50 dark:bg-red-900/30 border-red-100 dark:border-red-800 text-red-500 dark:text-red-400' : 'bg-stone-50 dark:bg-stone-800 border-stone-100 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-700'}">
+                                <i class="${isFollowed ? 'fas' : 'far'} fa-heart"></i>
+                            </button>
+                        </div>
+                        <button onclick="openBookingModal('${w.id}')" class="w-full bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-colors py-2.5 rounded-xl text-xs font-semibold shadow-sm">
+                            <i class="far fa-calendar-check mr-1"></i> Book Slot
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleFollow(id) {
+            const index = followedWorkshops.indexOf(id);
+            if (index > -1) {
+                followedWorkshops.splice(index, 1);
+            } else {
+                followedWorkshops.push(id);
+                gsap.fromTo('#btn-follow-' + id, {scale: 1.15}, {scale: 1, duration: 0.3, ease: "back.out(1.7)"});
+            }
+            localStorage.setItem('bhat_followed', JSON.stringify(followedWorkshops));
+            
+            updateFollowButtonState(id);
+            if(document.getElementById('profile').classList.contains('active')) {
+                renderFollowed();
+            }
+            
+            if(document.getElementById('explore').classList.contains('active')) {
+                renderWorkshops(allWorkshops);
+            }
+        }
+
+        function updateFollowButtonState(id) {
+            const btn = document.getElementById('btn-follow-' + id);
+            if (!btn) return;
+            
+            const isFollowed = followedWorkshops.includes(id);
+            
+            if (id === 'aashaq-bike-point') {
+                if (isFollowed) {
+                    btn.innerHTML = '<i class="fas fa-heart"></i> <span>Saved</span>';
+                    btn.className = 'mt-6 w-full ripple bg-red-50 border border-red-100 text-red-500 transition-all p-4 rounded-2xl font-semibold flex items-center justify-center gap-2 text-sm';
+                } else {
+                    btn.innerHTML = '<i class="far fa-heart"></i> <span>Save Workshop</span>';
+                    btn.className = 'mt-6 w-full ripple bg-white border border-stone-200 text-bhat-ink hover:bg-stone-50 transition-all p-4 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-sm text-sm';
+                }
+            } else {
+                if (isFollowed) {
+                    btn.innerHTML = '<i class="fas fa-heart"></i>';
+                    btn.className = 'w-11 h-11 rounded-xl flex items-center justify-center transition-colors border bg-red-50 border-red-100 text-red-500';
+                } else {
+                    btn.innerHTML = '<i class="far fa-heart"></i>';
+                    btn.className = 'w-11 h-11 rounded-xl flex items-center justify-center transition-colors border bg-stone-50 border-stone-100 text-stone-400 hover:bg-stone-100';
+                }
+            }
+        }
+
+        function renderFollowed() {
+            const list = document.getElementById('followedList');
+            const emptyMsg = document.getElementById('emptyFollowed');
+            
+            Array.from(list.children).forEach(child => {
+                if(child.id !== 'emptyFollowed') child.remove();
+            });
+
+            if (followedWorkshops.length === 0) {
+                emptyMsg.style.display = 'block';
+                return;
+            }
+
+            emptyMsg.style.display = 'none';
+            
+            followedWorkshops.forEach(id => {
+                const workshop = allWorkshops.find(w => w.id === id);
+                if (!workshop) return;
+
+                const item = document.createElement('div');
+                item.className = 'bg-white border border-stone-100 shadow-sm p-3 rounded-2xl flex items-center gap-4';
+                item.innerHTML = `
+                    <img src="${workshop.image}" class="w-14 h-14 rounded-xl object-cover">
+                    <div class="flex-1">
+                        <h4 class="font-serif font-medium text-bhat-ink">${workshop.name}</h4>
+                        <p class="text-xs text-stone-500 font-medium"><i class="fas fa-map-marker-alt text-stone-300 mr-1"></i>${workshop.location}</p>
+                    </div>
+                    <div class="flex gap-2 pr-2">
+                        <a href="tel:${workshop.phone}" class="w-9 h-9 rounded-full bg-stone-50 border border-stone-100 flex items-center justify-center hover:bg-stone-100 text-stone-500 transition-colors">
+                            <i class="fas fa-phone text-xs"></i>
+                        </a>
+                        <button onclick="toggleFollow('${workshop.id}')" class="w-9 h-9 rounded-full bg-red-50 border border-red-100 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function editProfileName() {
+            const modal = document.getElementById('editProfileModal');
+            const content = document.getElementById('editProfileContent');
+            const input = document.getElementById('editNameInput');
+            
+            input.value = currentUser;
+            
+            modal.classList.remove('hidden');
+            void modal.offsetWidth; // Trigger reflow
+            
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+            
+            setTimeout(() => input.focus(), 300);
+        }
+
+        function closeEditProfileModal() {
+            const modal = document.getElementById('editProfileModal');
+            const content = document.getElementById('editProfileContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function saveProfileName() {
+            const input = document.getElementById('editNameInput');
+            const newName = input.value;
+            if (newName && newName.trim() !== "") {
+                currentUser = newName.trim();
+                localStorage.setItem('bhat_user', currentUser);
+                document.getElementById('profileNameDisplay').textContent = currentUser;
+                closeEditProfileModal();
+            }
+        }
+
+        function handleProfilePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profilePhoto = e.target.result;
+                    localStorage.setItem('bhat_profile_photo', profilePhoto);
+                    document.getElementById('profileIcon').classList.add('hidden');
+                    const img = document.getElementById('profileImage');
+                    img.src = profilePhoto;
+                    img.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function showModal(msg) {
+            document.getElementById('modalMessage').textContent = msg;
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('modalContent');
+            
+            modal.classList.remove('hidden');
+            // Trigger reflow
+            void modal.offsetWidth;
+            
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('modalContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Continuous floating animation for background tools
+        gsap.utils.toArray('.floating-tool').forEach(tool => {
+            gsap.to(tool, {
+                rotation: "+=15",
+                scale: 1.05,
+                duration: "random(3, 5)",
+                yoyo: true,
+                repeat: -1,
+                ease: "sine.inOut",
+                delay: "random(0, 2)"
+            });
+        });
+
+        // --- New Features Logic ---
+
+        function openWorkshopDetail(id) {
+            const workshop = allWorkshops.find(w => w.id === id);
+            if (!workshop) return;
+
+            const modal = document.getElementById('workshopDetailModal');
+            const content = document.getElementById('workshopDetailContent');
+            const body = document.getElementById('workshopDetailBody');
+
+            // Generate gallery images (mocking if not present)
+            const gallery = workshop.gallery || [
+                workshop.image,
+                'https://images.unsplash.com/photo-1625047509168-a71c6f959828?q=80&w=500&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=500&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=500&auto=format&fit=crop'
+            ];
+
+            const galleryHtml = gallery.map(img => `
+                <div class="min-w-[120px] h-24 rounded-xl overflow-hidden flex-shrink-0 border border-stone-200 dark:border-stone-700">
+                    <img src="${img}" class="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" onclick="document.getElementById('mainWorkshopImage').src='${img}'">
+                </div>
+            `).join('');
+
+            const hoursHtml = `
+                <ul class="text-sm text-stone-600 dark:text-stone-400 space-y-2">
+                    <li class="flex justify-between"><span class="font-medium">Monday</span> <span>10:00 AM - 8:00 PM</span></li>
+                    <li class="flex justify-between"><span class="font-medium">Tuesday</span> <span>10:00 AM - 8:00 PM</span></li>
+                    <li class="flex justify-between"><span class="font-medium">Wednesday</span> <span>10:00 AM - 8:00 PM</span></li>
+                    <li class="flex justify-between"><span class="font-medium">Thursday</span> <span>10:00 AM - 8:00 PM</span></li>
+                    <li class="flex justify-between text-red-500"><span class="font-medium">Friday</span> <span>Closed</span></li>
+                    <li class="flex justify-between"><span class="font-medium">Saturday</span> <span>10:00 AM - 8:00 PM</span></li>
+                    <li class="flex justify-between"><span class="font-medium">Sunday</span> <span>10:00 AM - 4:00 PM</span></li>
+                </ul>
+            `;
+
+            body.innerHTML = `
+                <div class="h-64 sm:h-80 relative">
+                    <img id="mainWorkshopImage" src="${workshop.image}" class="w-full h-full object-cover transition-all duration-300">
+                    <div class="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6 pt-20">
+                        <h2 class="text-3xl font-serif font-medium text-white mb-1">${workshop.name}</h2>
+                        <p class="text-stone-300 text-sm flex items-center gap-2"><i class="fas fa-map-marker-alt"></i> ${workshop.location}</p>
+                    </div>
+                </div>
+                <div class="p-6 sm:p-8">
+                    <!-- Photo Gallery -->
+                    <div class="mb-8">
+                        <h4 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-3">Photo Gallery</h4>
+                        <div class="flex overflow-x-auto gap-3 pb-2 scrollbar-hide">
+                            ${galleryHtml}
+                        </div>
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-4">Services</h4>
+                            <div class="flex flex-wrap gap-2 mb-8">
+                                ${workshop.services.map(s => `<span class="text-xs font-medium bg-stone-50 dark:bg-stone-800 border border-stone-100 dark:border-stone-700 px-3 py-1.5 rounded-lg text-bhat-ink dark:text-bhat-darkInk">${s}</span>`).join('')}
+                            </div>
+                            
+                            <h4 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-4">Contact Info</h4>
+                            <div class="space-y-3 mb-8">
+                                <div class="flex items-center gap-3 text-sm text-bhat-ink dark:text-bhat-darkInk">
+                                    <div class="w-8 h-8 rounded-full bg-stone-50 dark:bg-stone-800 flex items-center justify-center text-stone-500 dark:text-stone-400"><i class="fas fa-phone"></i></div>
+                                    ${workshop.phone}
+                                </div>
+                            </div>
+
+                            <h4 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-4">Opening Hours</h4>
+                            <div class="bg-stone-50 dark:bg-stone-800/50 rounded-2xl p-4 border border-stone-100 dark:border-stone-700 mb-8 sm:mb-0">
+                                ${hoursHtml}
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-4">Location</h4>
+                            <div class="rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-700 h-64 mb-6 relative bg-stone-100 dark:bg-stone-800 shadow-inner">
+                                <iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${encodeURIComponent(workshop.name + ' ' + workshop.location)}&t=&z=14&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
+                            </div>
+                            <button onclick="openBookingModal('${workshop.id}'); closeWorkshopDetailModal();" class="w-full ripple btn-dark bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-all shadow-md">
+                                Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }
+
+        function closeWorkshopDetailModal() {
+            const modal = document.getElementById('workshopDetailModal');
+            const content = document.getElementById('workshopDetailContent');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function openBookingModal(id) {
+            const workshop = allWorkshops.find(w => w.id === id);
+            if (!workshop) return;
+
+            document.getElementById('bookingWorkshopId').value = id;
+            document.getElementById('bookingWorkshopName').textContent = `Booking at ${workshop.name}`;
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('bookingDate').setAttribute('min', today);
+
+            const modal = document.getElementById('bookingModal');
+            const content = document.getElementById('bookingContent');
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }
+
+        function closeBookingModal() {
+            const modal = document.getElementById('bookingModal');
+            const content = document.getElementById('bookingContent');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        document.getElementById('bookingForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('bookingWorkshopId').value;
+            const date = document.getElementById('bookingDate').value;
+            const time = document.getElementById('bookingTime').value;
+            const vehicle = document.getElementById('bookingVehicle').value;
+
+            bookings.push({ id: Date.now(), workshopId: id, date, time, vehicle, status: 'Pending' });
+            localStorage.setItem('bhat_bookings', JSON.stringify(bookings));
+
+            closeBookingModal();
+            e.target.reset();
+            showModal('Your appointment has been booked successfully! The workshop will contact you soon.');
+        });
+
+        // Dashboard Logic
+        function loginMechanic() {
+            const phone = document.getElementById('mechanicPhoneInput').value;
+            if (phone.trim().length > 5) {
+                mechanicLoggedIn = true;
+                mechanicPhone = phone.trim();
+                localStorage.setItem('bhat_mechanic_logged_in', 'true');
+                localStorage.setItem('bhat_mechanic_phone', mechanicPhone);
+                renderDashboard();
+            } else {
+                alert("Please enter a valid phone number.");
+            }
+        }
+
+        function logoutMechanic() {
+            mechanicLoggedIn = false;
+            mechanicPhone = '';
+            localStorage.setItem('bhat_mechanic_logged_in', 'false');
+            localStorage.setItem('bhat_mechanic_phone', '');
+            renderDashboard();
+        }
+
+        function renderDashboard() {
+            const loginSection = document.getElementById('dashboardLogin');
+            const contentSection = document.getElementById('dashboardContent');
+
+            if (!mechanicLoggedIn) {
+                loginSection.classList.remove('hidden');
+                contentSection.classList.add('hidden');
+                return;
+            }
+
+            loginSection.classList.add('hidden');
+            contentSection.classList.remove('hidden');
+
+            const ownedWorkshops = allWorkshops.filter(w => w.phone.replace(/\\s/g, '') === mechanicPhone.replace(/\\s/g, ''));
+
+            if (ownedWorkshops.length === 0) {
+                contentSection.innerHTML = `
+                    <div class="bg-white dark:bg-bhat-darkSurface border border-stone-100 dark:border-stone-800 p-8 rounded-[2rem] text-center">
+                        <p class="text-stone-500 dark:text-stone-400 mb-4">No workshops found for this phone number.</p>
+                        <button onclick="logoutMechanic()" class="text-sm text-bhat-accent hover:underline">Logout</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="flex justify-between items-center bg-white dark:bg-bhat-darkSurface border border-stone-100 dark:border-stone-800 p-6 rounded-[2rem]">
+                    <div>
+                        <h3 class="font-serif font-medium text-xl text-bhat-ink dark:text-bhat-darkInk">Welcome Back</h3>
+                        <p class="text-xs text-stone-500 dark:text-stone-400">${mechanicPhone}</p>
+                    </div>
+                    <button onclick="logoutMechanic()" class="text-sm bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 px-4 py-2 rounded-xl hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors">Logout</button>
+                </div>
+            `;
+
+            ownedWorkshops.forEach(w => {
+                const savesCount = Math.floor(Math.random() * 50) + 10;
+                const isOpen = localStorage.getItem('status_' + w.id) !== 'closed';
+
+                html += `
+                    <div class="bg-white dark:bg-bhat-darkSurface border border-stone-100 dark:border-stone-800 p-6 md:p-8 rounded-[2rem] shadow-sm">
+                        <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
+                            <img src="${w.image}" class="w-24 h-24 rounded-2xl object-cover border border-stone-200 dark:border-stone-700">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-1">
+                                    <h3 class="text-2xl font-serif font-medium text-bhat-ink dark:text-bhat-darkInk">${w.name}</h3>
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${isOpen ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}">
+                                        ${isOpen ? 'Open' : 'Closed'}
+                                    </span>
+                                </div>
+                                <p class="text-stone-500 dark:text-stone-400 text-sm mb-4"><i class="fas fa-map-marker-alt mr-1"></i> ${w.location}</p>
+                                <div class="flex gap-4">
+                                    <div class="text-center">
+                                        <div class="text-xl font-bold text-bhat-ink dark:text-bhat-darkInk">${savesCount}</div>
+                                        <div class="text-[10px] uppercase tracking-wider text-stone-400">Saves</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-xl font-bold text-bhat-ink dark:text-bhat-darkInk">${bookings.filter(b => b.workshopId === w.id).length}</div>
+                                        <div class="text-[10px] uppercase tracking-wider text-stone-400">Bookings</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2 w-full md:w-auto">
+                                <button onclick="toggleWorkshopStatus('${w.id}')" class="bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-bhat-ink dark:text-bhat-darkInk px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
+                                    Mark as ${isOpen ? 'Closed' : 'Open'}
+                                </button>
+                                <button onclick="promptUpdatePhoto('${w.id}')" class="bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-bhat-ink dark:text-bhat-darkInk px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
+                                    Update Photo
+                                </button>
+                                <button onclick="openEditWorkshopModal('${w.id}')" class="bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-bhat-ink dark:text-bhat-darkInk px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
+                                    Edit Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            contentSection.innerHTML = html;
+        }
+
+        function openEditWorkshopModal(id) {
+            const workshop = userWorkshops.find(w => w.id === id);
+            if (!workshop) {
+                alert("You can only edit workshops you have registered.");
+                return;
+            }
+
+            document.getElementById('editWId').value = workshop.id;
+            document.getElementById('editWName').value = workshop.name;
+            document.getElementById('editWOwner').value = workshop.owner || '';
+            document.getElementById('editWPhone').value = workshop.phone;
+            document.getElementById('editWLocation').value = workshop.location;
+            document.getElementById('editWServices').value = workshop.services.join(', ');
+
+            const modal = document.getElementById('editWorkshopModal');
+            const content = document.getElementById('editWorkshopContent');
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }
+
+        function closeEditWorkshopModal() {
+            const modal = document.getElementById('editWorkshopModal');
+            const content = document.getElementById('editWorkshopContent');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        document.getElementById('editWorkshopForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editWId').value;
+            
+            const wsIndex = userWorkshops.findIndex(w => w.id === id);
+            if (wsIndex > -1) {
+                userWorkshops[wsIndex].name = document.getElementById('editWName').value;
+                userWorkshops[wsIndex].owner = document.getElementById('editWOwner').value;
+                userWorkshops[wsIndex].location = document.getElementById('editWLocation').value;
+                userWorkshops[wsIndex].services = document.getElementById('editWServices').value.split(',').map(s => s.trim());
+                
+                localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                
+                const allWsIndex = allWorkshops.findIndex(w => w.id === id);
+                if (allWsIndex > -1) {
+                    allWorkshops[allWsIndex].name = userWorkshops[wsIndex].name;
+                    allWorkshops[allWsIndex].owner = userWorkshops[wsIndex].owner;
+                    allWorkshops[allWsIndex].location = userWorkshops[wsIndex].location;
+                    allWorkshops[allWsIndex].services = userWorkshops[wsIndex].services;
+                }
+
+                closeEditWorkshopModal();
+                renderDashboard();
+                renderWorkshops(allWorkshops);
+                showModal('Workshop details updated successfully!');
+            }
+        });
+
+        function toggleWorkshopStatus(id) {
+            const current = localStorage.getItem('status_' + id);
+            if (current === 'closed') {
+                localStorage.setItem('status_' + id, 'open');
+            } else {
+                localStorage.setItem('status_' + id, 'closed');
+            }
+            renderDashboard();
+        }
+
+        function promptUpdatePhoto(id) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const newUrl = e.target.result;
+                        const wsIndex = userWorkshops.findIndex(w => w.id === id);
+                        if (wsIndex > -1) {
+                            userWorkshops[wsIndex].image = newUrl;
+                            localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                            const allWsIndex = allWorkshops.findIndex(w => w.id === id);
+                            if(allWsIndex > -1) allWorkshops[allWsIndex].image = newUrl;
+                            renderDashboard();
+                            renderWorkshops(allWorkshops);
+                            showModal('Workshop photo updated successfully!');
+                        } else {
+                            alert("You can only update photos for workshops you registered.");
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        }
+
+        // Hook into navigation to render dashboard
+        const originalNavigate = window.navigate;
+        window.navigate = function(pageId) {
+            originalNavigate(pageId);
+            if (pageId === 'dashboard') {
+                renderDashboard();
+            }
+        };
+
+        document.addEventListener('mousemove', (e) => {
+            // Home parallax background
+            if(document.getElementById('home').classList.contains('active')) {
+                const x = (window.innerWidth - e.pageX * 2) / 100;
+                const y = (window.innerHeight - e.pageY * 2) / 100;
+                gsap.to('.parallax-bg', {
+                    x: x,
+                    y: y,
+                    duration: 1,
+                    ease: "power1.out"
+                });
+            }
+
+            // Reactive floating tools parallax
+            const mouseX = (e.clientX / window.innerWidth - 0.5);
+            const mouseY = (e.clientY / window.innerHeight - 0.5);
+            
+            gsap.utils.toArray('.floating-tool').forEach(tool => {
+                const speed = parseFloat(tool.getAttribute('data-speed'));
+                gsap.to(tool, {
+                    x: mouseX * 80 * speed,
+                    y: mouseY * 80 * speed,
+                    duration: 2,
+                    ease: "power2.out",
+                    overwrite: "auto"
+                });
+            });
+        });
+    </script>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="https://wa.me/919906584655" target="_blank" class="fixed bottom-24 md:bottom-8 right-6 z-50 w-14 h-14 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full flex items-center justify-center text-3xl shadow-lg transition-colors whatsapp-float">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+</body>
+</html>
