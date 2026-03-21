@@ -230,7 +230,7 @@
             </div>
 
             <!-- Featured Workshop -->
-            <div class="max-w-7xl mx-auto px-6 py-16">
+            <div id="featured-section" class="max-w-7xl mx-auto px-6 py-16">
                 <div class="flex items-center justify-between mb-10">
                     <h2 class="text-3xl font-serif font-medium text-bhat-ink">Featured <span class="italic text-stone-400">Workshop</span></h2>
                     <div class="h-[1px] flex-1 bg-stone-200 ml-6"></div>
@@ -257,7 +257,7 @@
                                     </div>
                                     <div>
                                         <div class="text-[10px] text-stone-400 uppercase tracking-wider font-semibold">Contact</div>
-                                        <div id="featured-phone" class="font-medium text-bhat-ink dark:text-bhat-darkInk text-sm">6006809391</div>
+                                        <div id="featured-phone" class="font-medium text-bhat-ink dark:text-bhat-darkInk text-sm">9906584655</div>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-4 bg-stone-50 dark:bg-[#121212] border border-stone-100 dark:border-stone-800 p-4 rounded-2xl">
@@ -272,7 +272,7 @@
                             </div>
 
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <a id="featured-link-call" href="tel:+916006809391" class="ripple bg-white dark:bg-bhat-darkSurface border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 transition-all p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-xs font-semibold text-bhat-ink dark:text-bhat-darkInk group/btn shadow-sm">
+                                <a id="featured-link-call" href="tel:+919906584655" class="ripple bg-white dark:bg-bhat-darkSurface border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 transition-all p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-xs font-semibold text-bhat-ink dark:text-bhat-darkInk group/btn shadow-sm">
                                     <i class="fas fa-phone text-stone-400 group-hover/btn:text-bhat-ink dark:group-hover/btn:text-white transition-colors"></i>
                                     Call
                                 </a>
@@ -512,6 +512,25 @@
         </div>
     </div>
 
+    <!-- Confirm Modal -->
+    <div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center bg-bhat-ink/40 dark:bg-black/60 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-bhat-darkSurface p-10 rounded-[2rem] max-w-sm w-full mx-6 text-center transform scale-95 transition-transform duration-300 shadow-2xl" id="confirmModalContent">
+            <div class="w-16 h-16 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-6 border border-red-100 dark:border-red-800">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="text-2xl font-serif font-medium mb-2 text-bhat-ink dark:text-bhat-darkInk">Confirm Deletion</h3>
+            <p class="text-stone-500 dark:text-stone-400 text-sm mb-8 font-light" id="confirmModalMessage">Are you sure you want to delete this workshop?</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal()" class="flex-1 bg-stone-100 dark:bg-stone-800 text-bhat-ink dark:text-bhat-darkInk font-medium text-sm py-3.5 rounded-full hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors shadow-sm">
+                    Cancel
+                </button>
+                <button id="confirmActionBtn" class="flex-1 bg-red-500 text-white font-medium text-sm py-3.5 rounded-full hover:bg-red-600 transition-colors shadow-md">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Workshop Detail Modal -->
     <div id="workshopDetailModal" class="fixed inset-0 z-50 flex items-center justify-center bg-bhat-ink/60 dark:bg-black/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300 p-4">
         <div class="bg-white dark:bg-bhat-darkSurface rounded-[2rem] max-w-2xl w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300 shadow-2xl relative" id="workshopDetailContent">
@@ -564,7 +583,7 @@
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Call Link (Optional)</label>
-                        <input type="text" id="editWLinkCall" class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all" placeholder="e.g. tel:+916006809391">
+                        <input type="text" id="editWLinkCall" class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all" placeholder="e.g. tel:+919906584655">
                     </div>
                     <div class="space-y-2">
                         <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Directions Link (Optional)</label>
@@ -647,7 +666,7 @@
         }
         
         const defaultWorkshopsDB = [
-            { id: 'aashaq-bike-point', name: 'Aashaq Bike Point', location: 'Villagam', phone: '6006809391', services: ['Repair', 'Service', 'Parts'], rating: 5.0, image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=500&auto=format&fit=crop', links: { call: '+916006809391', directions: 'https://g.co/kgs/jH8xfRi', youtube: 'https://youtube.com/@aashaqbikepoint?si=XMJbbCSTaWaL7yU8', instagram: 'https://www.instagram.com/aashaq_bike_point_villagam' } },
+            { id: 'aashaq-bike-point', name: 'Aashaq Bike Point', location: 'Villagam', phone: '9906584655', services: ['Repair', 'Service', 'Parts'], rating: 5.0, image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=500&auto=format&fit=crop', links: { call: '+919906584655', directions: 'https://g.co/kgs/jH8xfRi', youtube: 'https://youtube.com/@aashaqbikepoint?si=XMJbbCSTaWaL7yU8', instagram: 'https://www.instagram.com/aashaq_bike_point_villagam' } },
             { id: 'ws-2', name: 'Royal Enfield Masters', location: 'Srinagar', phone: '9876543210', services: ['Engine Rebuild', 'Customization'], rating: 4.8, image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=500&auto=format&fit=crop' },
             { id: 'ws-3', name: 'Valley Auto Care', location: 'Anantnag', phone: '9876543211', services: ['Car Wash', 'Detailing', 'Oil Change'], rating: 4.5, image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=500&auto=format&fit=crop' },
             { id: 'ws-4', name: 'Speed Moto Tech', location: 'Baramulla', phone: '9876543212', services: ['Diagnostics', 'Electrical'], rating: 4.7, image: 'https://images.unsplash.com/photo-1625047509168-a71c6f959828?q=80&w=500&auto=format&fit=crop' },
@@ -659,7 +678,9 @@
 
         function updateFeaturedWorkshopDOM() {
             const featured = allWorkshops.find(w => w.id === 'aashaq-bike-point');
+            const featuredSection = document.getElementById('featured-section');
             if (featured) {
+                if (featuredSection) featuredSection.classList.remove('hidden');
                 const nameEl = document.getElementById('featured-name');
                 const locationEl = document.getElementById('featured-location');
                 const phoneEl = document.getElementById('featured-phone');
@@ -680,6 +701,8 @@
                     if (youtubeEl) youtubeEl.href = featured.links.youtube || '#';
                     if (instagramEl) instagramEl.href = featured.links.instagram || '#';
                 }
+            } else {
+                if (featuredSection) featuredSection.classList.add('hidden');
             }
         }
 
@@ -1018,6 +1041,41 @@
             }, 300);
         }
 
+        function showConfirmModal(msg, onConfirm) {
+            document.getElementById('confirmModalMessage').textContent = msg;
+            const modal = document.getElementById('confirmModal');
+            const content = document.getElementById('confirmModalContent');
+            const confirmBtn = document.getElementById('confirmActionBtn');
+            
+            // Remove old event listeners by cloning
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            
+            newConfirmBtn.addEventListener('click', () => {
+                onConfirm();
+                closeConfirmModal();
+            });
+
+            modal.classList.remove('hidden');
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            const content = document.getElementById('confirmModalContent');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
         // Continuous floating animation for background tools
         gsap.utils.toArray('.floating-tool').forEach(tool => {
             gsap.to(tool, {
@@ -1212,7 +1270,7 @@
             contentSection.classList.remove('hidden');
 
             let ownedWorkshops = allWorkshops.filter(w => w.phone.replace(/\\s/g, '') === mechanicPhone.replace(/\\s/g, ''));
-            if (mechanicPhone === '6006809391') {
+            if (mechanicPhone === '9906584655') {
                 ownedWorkshops = allWorkshops; // Admin sees all workshops
             }
 
@@ -1268,10 +1326,13 @@
                                     Mark as ${isOpen ? 'Closed' : 'Open'}
                                 </button>
                                 <button onclick="promptUpdatePhoto('${w.id}')" class="bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-bhat-ink dark:text-bhat-darkInk px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
-                                    Update Photo
+                                    Update Photos
                                 </button>
                                 <button onclick="openEditWorkshopModal('${w.id}')" class="bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-bhat-ink dark:text-bhat-darkInk px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
                                     Edit Details
+                                </button>
+                                <button onclick="deleteWorkshop('${w.id}')" class="bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-500 dark:text-red-400 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
+                                    Delete Workshop
                                 </button>
                             </div>
                         </div>
@@ -1287,7 +1348,7 @@
             let isDBWorkshop = false;
             if (!workshop) {
                 workshop = workshopsDB.find(w => w.id === id);
-                if (workshop && mechanicPhone === '6006809391') {
+                if (workshop && mechanicPhone === '9906584655') {
                     isDBWorkshop = true;
                 } else {
                     alert("You can only edit workshops you have registered.");
@@ -1355,7 +1416,7 @@
                 userWorkshops[wsIndex].services = services;
                 userWorkshops[wsIndex].links = links;
                 localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
-            } else if (mechanicPhone === '6006809391') {
+            } else if (mechanicPhone === '9906584655') {
                 const dbIndex = workshopsDB.findIndex(w => w.id === id);
                 if (dbIndex > -1) {
                     workshopsDB[dbIndex].name = name;
@@ -1393,40 +1454,89 @@
             renderDashboard();
         }
 
+        function deleteWorkshop(id) {
+            showConfirmModal("Are you sure you want to delete this workshop? This action cannot be undone.", () => {
+                // Remove from userWorkshops if exists
+                const wsIndex = userWorkshops.findIndex(w => w.id === id);
+                if (wsIndex > -1) {
+                    userWorkshops.splice(wsIndex, 1);
+                    localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                } else if (mechanicPhone === '9906584655') {
+                    // Admin deleting a DB workshop
+                    const dbIndex = workshopsDB.findIndex(w => w.id === id);
+                    if (dbIndex > -1) {
+                        workshopsDB.splice(dbIndex, 1);
+                        localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                    }
+                }
+
+                // Remove from allWorkshops
+                const allWsIndex = allWorkshops.findIndex(w => w.id === id);
+                if (allWsIndex > -1) {
+                    allWorkshops.splice(allWsIndex, 1);
+                }
+
+                // Clean up status
+                localStorage.removeItem('status_' + id);
+
+                renderDashboard();
+                renderWorkshops(allWorkshops);
+                
+                // If it's the featured workshop, update DOM
+                if (id === 'aashaq-bike-point') {
+                    updateFeaturedWorkshopDOM();
+                }
+
+                showModal('Workshop deleted successfully.');
+            });
+        }
+
         function promptUpdatePhoto(id) {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
-            input.onchange = function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const newUrl = e.target.result;
-                        const wsIndex = userWorkshops.findIndex(w => w.id === id);
-                        if (wsIndex > -1) {
-                            userWorkshops[wsIndex].image = newUrl;
-                            localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
-                        } else if (mechanicPhone === '6006809391') {
-                            const dbIndex = workshopsDB.findIndex(w => w.id === id);
-                            if (dbIndex > -1) {
-                                workshopsDB[dbIndex].image = newUrl;
-                                localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
-                            }
-                        } else {
-                            alert("You can only update photos for workshops you registered.");
-                            return;
+            input.multiple = true;
+            input.onchange = async function(event) {
+                const files = Array.from(event.target.files);
+                if (files.length > 0) {
+                    const readPromises = files.map(file => {
+                        return new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = (e) => resolve(e.target.result);
+                            reader.readAsDataURL(file);
+                        });
+                    });
+
+                    const newUrls = await Promise.all(readPromises);
+                    const mainUrl = newUrls[0];
+
+                    const wsIndex = userWorkshops.findIndex(w => w.id === id);
+                    if (wsIndex > -1) {
+                        userWorkshops[wsIndex].image = mainUrl;
+                        userWorkshops[wsIndex].gallery = newUrls;
+                        localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                    } else if (mechanicPhone === '9906584655') {
+                        const dbIndex = workshopsDB.findIndex(w => w.id === id);
+                        if (dbIndex > -1) {
+                            workshopsDB[dbIndex].image = mainUrl;
+                            workshopsDB[dbIndex].gallery = newUrls;
+                            localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
                         }
-                        
-                        const allWsIndex = allWorkshops.findIndex(w => w.id === id);
-                        if(allWsIndex > -1) allWorkshops[allWsIndex].image = newUrl;
-                        
-                        renderDashboard();
-                        renderWorkshops(allWorkshops);
-                        updateFeaturedWorkshopDOM();
-                        showModal('Workshop photo updated successfully!');
-                    };
-                    reader.readAsDataURL(file);
+                    } else {
+                        alert("You can only update photos for workshops you registered.");
+                        return;
+                    }
+                    
+                    const allWsIndex = allWorkshops.findIndex(w => w.id === id);
+                    if(allWsIndex > -1) {
+                        allWorkshops[allWsIndex].image = mainUrl;
+                        allWorkshops[allWsIndex].gallery = newUrls;
+                    }
+                    
+                    renderDashboard();
+                    renderWorkshops(allWorkshops);
+                    updateFeaturedWorkshopDOM();
+                    showModal('Workshop photos updated successfully!');
                 }
             };
             input.click();
@@ -1472,7 +1582,7 @@
     </script>
 
     <!-- Floating WhatsApp Button -->
-    <a href="https://wa.me/916006809391" target="_blank" class="fixed bottom-24 md:bottom-8 right-6 z-50 w-14 h-14 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full flex items-center justify-center text-3xl shadow-lg transition-colors whatsapp-float">
+    <a href="https://wa.me/919906584655" target="_blank" class="fixed bottom-24 md:bottom-8 right-6 z-50 w-14 h-14 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full flex items-center justify-center text-3xl shadow-lg transition-colors whatsapp-float">
         <i class="fab fa-whatsapp"></i>
     </a>
 </body>
