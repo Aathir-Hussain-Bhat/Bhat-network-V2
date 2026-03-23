@@ -122,8 +122,16 @@
             70% { box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
             100% { box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
         }
+        @keyframes sos-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
         .whatsapp-float {
             animation: whatsapp-pulse 2s infinite;
+        }
+        .sos-float {
+            animation: sos-pulse 2s infinite;
         }
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
@@ -238,17 +246,25 @@
 
                 <div class="bg-white border border-stone-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-[2rem] overflow-hidden relative group" data-aos="fade-up">
                     <div class="grid md:grid-cols-2 gap-0">
-                        <div class="relative h-72 md:h-full overflow-hidden">
+                        <div class="relative h-72 md:h-full overflow-hidden flex flex-col">
                             <img id="featured-image" src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=1000&auto=format&fit=crop" alt="Aashaq Bike Point" class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-1000">
-                            <div class="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-bold text-bhat-ink tracking-wider uppercase flex items-center gap-2 shadow-sm">
+                            <div class="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-bold text-bhat-ink tracking-wider uppercase flex items-center gap-2 shadow-sm z-10">
                                 <i class="fas fa-star text-amber-500"></i> Editor's Choice
+                            </div>
+                            <div id="featured-gallery" class="absolute bottom-6 left-6 right-6 flex gap-2 overflow-x-auto pb-2 z-10 hide-scrollbar">
+                                <!-- Gallery images will be injected here -->
                             </div>
                         </div>
                         <div class="flex flex-col justify-center p-8 md:p-12">
                             <h3 id="featured-name" class="text-4xl font-serif font-medium mb-3 text-bhat-ink dark:text-bhat-darkInk">Aashaq Bike Point</h3>
-                            <p class="text-stone-500 dark:text-stone-400 text-sm mb-8 flex items-center gap-2 font-medium">
+                            <div id="featured-status" class="text-xs font-bold uppercase tracking-wider mb-4"></div>
+                            <p class="text-stone-500 dark:text-stone-400 text-sm mb-4 flex items-center gap-2 font-medium">
                                 <i class="fas fa-map-marker-alt text-stone-300"></i> <span id="featured-location">Villagam, Kashmir</span>
                             </p>
+                            
+                            <div id="featured-services" class="flex flex-wrap gap-2 mb-8">
+                                <!-- Services will be injected here -->
+                            </div>
                             
                             <div class="space-y-3 mb-10">
                                 <div class="flex items-center gap-4 bg-stone-50 dark:bg-[#121212] border border-stone-100 dark:border-stone-800 p-4 rounded-2xl">
@@ -276,6 +292,10 @@
                                     <i class="fas fa-phone text-stone-400 group-hover/btn:text-bhat-ink dark:group-hover/btn:text-white transition-colors"></i>
                                     Call
                                 </a>
+                                <a id="featured-link-whatsapp" href="https://wa.me/919906584655?text=Hi,%20I%20found%20your%20workshop%20on%20Bhat%20Network.%20I%20need%20help%20with%20my%20bike..." target="_blank" class="ripple bg-white dark:bg-bhat-darkSurface border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 transition-all p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-xs font-semibold text-bhat-ink dark:text-bhat-darkInk group/btn shadow-sm">
+                                    <i class="fab fa-whatsapp text-stone-400 group-hover/btn:text-green-500 transition-colors"></i>
+                                    WhatsApp
+                                </a>
                                 <a id="featured-link-directions" href="https://g.co/kgs/jH8xfRi" target="_blank" class="ripple bg-white dark:bg-bhat-darkSurface border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 transition-all p-3 rounded-2xl flex flex-col items-center justify-center gap-2 text-xs font-semibold text-bhat-ink dark:text-bhat-darkInk group/btn shadow-sm">
                                     <i class="fas fa-directions text-stone-400 group-hover/btn:text-blue-500 transition-colors"></i>
                                     Directions
@@ -291,7 +311,7 @@
                             </div>
                             
                             <button onclick="toggleFollow('aashaq-bike-point')" id="btn-follow-aashaq-bike-point" class="mt-6 w-full ripple bg-white border border-stone-200 text-bhat-ink hover:bg-stone-50 transition-all p-4 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-sm text-sm">
-                                <i class="far fa-heart"></i> <span id="follow-text-aashaq-bike-point">Follow Workshop</span>
+                                <i class="far fa-heart"></i> <span id="follow-text-aashaq-bike-point">Save to Garage</span>
                             </button>
                         </div>
                     </div>
@@ -382,12 +402,12 @@
                 </div>
 
                 <h3 class="text-lg font-serif font-medium mb-6 flex items-center gap-2 text-bhat-ink" data-aos="fade-right">
-                    <i class="fas fa-bookmark text-stone-300 text-sm"></i> Saved Workshops
+                    <i class="fas fa-bookmark text-stone-300 text-sm"></i> My Garage (Saved Workshops)
                 </h3>
                 
                 <div id="followedList" class="space-y-3" data-aos="fade-up">
                     <div class="text-center text-stone-400 py-10 text-sm bg-white border border-stone-100 border-dashed rounded-3xl" id="emptyFollowed">
-                        You haven't saved any workshops yet.
+                        You haven't saved any workshops to your garage yet.
                     </div>
                 </div>
             </div>
@@ -629,6 +649,17 @@
                     <input type="time" id="bookingTime" required class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all">
                 </div>
                 <div class="space-y-1">
+                    <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Service Needed</label>
+                    <select id="bookingServiceType" required class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all">
+                        <option value="" disabled selected>Select a service...</option>
+                        <option value="General Service">General Service</option>
+                        <option value="Oil Change">Oil Change</option>
+                        <option value="Repair">Repair / Fix Issue</option>
+                        <option value="Request Quote">Request a Quote</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
                     <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Vehicle Details (Optional)</label>
                     <input type="text" id="bookingVehicle" class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all" placeholder="e.g. Royal Enfield Classic 350">
                 </div>
@@ -685,15 +716,38 @@
                 const locationEl = document.getElementById('featured-location');
                 const phoneEl = document.getElementById('featured-phone');
                 const imageEl = document.getElementById('featured-image');
+                const galleryEl = document.getElementById('featured-gallery');
+                const servicesEl = document.getElementById('featured-services');
                 const callEl = document.getElementById('featured-link-call');
                 const directionsEl = document.getElementById('featured-link-directions');
                 const youtubeEl = document.getElementById('featured-link-youtube');
                 const instagramEl = document.getElementById('featured-link-instagram');
+                const statusEl = document.getElementById('featured-status');
                 
                 if (nameEl) nameEl.textContent = featured.name;
                 if (locationEl) locationEl.textContent = featured.location;
                 if (phoneEl) phoneEl.textContent = featured.phone;
                 if (imageEl) imageEl.src = featured.image;
+                
+                if (statusEl) {
+                    const isOpen = localStorage.getItem('status_' + featured.id) !== 'closed';
+                    statusEl.innerHTML = isOpen 
+                        ? `<span class="flex items-center gap-1.5 text-green-600 dark:text-green-400"><span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> OPEN NOW</span>`
+                        : `<span class="flex items-center gap-1.5 text-red-600 dark:text-red-400"><span class="w-2 h-2 rounded-full bg-red-500"></span> CLOSED</span>`;
+                }
+                
+                if (servicesEl && featured.services) {
+                    servicesEl.innerHTML = featured.services.map(s => `<span class="text-[10px] font-medium bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 px-2.5 py-1 rounded-md text-bhat-ink dark:text-bhat-darkInk uppercase tracking-wider">${s}</span>`).join('');
+                }
+                
+                if (galleryEl) {
+                    const gallery = featured.gallery || [featured.image];
+                    galleryEl.innerHTML = gallery.map(img => `
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 border-white/20 shadow-sm cursor-pointer hover:border-white transition-colors" onclick="document.getElementById('featured-image').src='${img}'">
+                            <img src="${img}" class="w-full h-full object-cover">
+                        </div>
+                    `).join('');
+                }
                 
                 if (featured.links) {
                     if (callEl) callEl.href = featured.links.call || `tel:${featured.phone}`;
@@ -833,6 +887,11 @@
 
             workshops.forEach((w, index) => {
                 const isFollowed = followedWorkshops.includes(w.id);
+                const isOpen = localStorage.getItem('status_' + w.id) !== 'closed';
+                const statusBadge = isOpen 
+                    ? `<div class="absolute top-4 left-4 bg-white/90 dark:bg-black/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5 text-green-600 dark:text-green-400 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Open Now</div>`
+                    : `<div class="absolute top-4 left-4 bg-white/90 dark:bg-black/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1.5 text-red-600 dark:text-red-400 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Closed</div>`;
+                
                 const card = document.createElement('div');
                 card.className = 'bg-white dark:bg-bhat-darkSurface border border-stone-100 dark:border-stone-800 shadow-[0_4px_20px_rgba(0,0,0,0.02)] rounded-3xl overflow-hidden group flex flex-col';
                 card.setAttribute('data-aos', 'fade-up');
@@ -841,6 +900,7 @@
                 card.innerHTML = `
                     <div class="h-48 overflow-hidden relative cursor-pointer" onclick="openWorkshopDetail('${w.id}')">
                         <img src="${w.image}" alt="${w.name}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                        ${statusBadge}
                         <div class="absolute top-4 right-4 bg-white/90 dark:bg-black/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 text-bhat-ink dark:text-white shadow-sm">
                             <i class="fas fa-star text-amber-500"></i> ${w.rating}
                         </div>
@@ -858,6 +918,9 @@
                         <div class="flex gap-2 mb-3">
                             <a href="tel:${w.phone}" class="flex-1 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-100 dark:border-stone-700 transition-colors text-center py-2.5 rounded-xl text-xs font-semibold text-bhat-ink dark:text-bhat-darkInk">
                                 <i class="fas fa-phone text-stone-400 dark:text-stone-500 mr-1"></i> Call
+                            </a>
+                            <a href="https://wa.me/91${w.phone}?text=Hi,%20I%20found%20your%20workshop%20on%20Bhat%20Network.%20I%20need%20help%20with%20my%20bike..." target="_blank" class="flex-1 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-100 dark:border-stone-700 transition-colors text-center py-2.5 rounded-xl text-xs font-semibold text-bhat-ink dark:text-bhat-darkInk">
+                                <i class="fab fa-whatsapp text-green-500 mr-1"></i> Chat
                             </a>
                             <button onclick="toggleFollow('${w.id}')" id="btn-follow-${w.id}" class="w-11 h-11 rounded-xl flex items-center justify-center transition-colors border ${isFollowed ? 'bg-red-50 dark:bg-red-900/30 border-red-100 dark:border-red-800 text-red-500 dark:text-red-400' : 'bg-stone-50 dark:bg-stone-800 border-stone-100 dark:border-stone-700 text-stone-400 dark:text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-700'}">
                                 <i class="${isFollowed ? 'fas' : 'far'} fa-heart"></i>
@@ -900,10 +963,10 @@
             
             if (id === 'aashaq-bike-point') {
                 if (isFollowed) {
-                    btn.innerHTML = '<i class="fas fa-heart"></i> <span>Saved</span>';
+                    btn.innerHTML = '<i class="fas fa-heart"></i> <span>Saved to Garage</span>';
                     btn.className = 'mt-6 w-full ripple bg-red-50 border border-red-100 text-red-500 transition-all p-4 rounded-2xl font-semibold flex items-center justify-center gap-2 text-sm';
                 } else {
-                    btn.innerHTML = '<i class="far fa-heart"></i> <span>Save Workshop</span>';
+                    btn.innerHTML = '<i class="far fa-heart"></i> <span>Save to Garage</span>';
                     btn.className = 'mt-6 w-full ripple bg-white border border-stone-200 text-bhat-ink hover:bg-stone-50 transition-all p-4 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-sm text-sm';
                 }
             } else {
@@ -1153,7 +1216,11 @@
                             <div class="space-y-3 mb-8">
                                 <div class="flex items-center gap-3 text-sm text-bhat-ink dark:text-bhat-darkInk">
                                     <div class="w-8 h-8 rounded-full bg-stone-50 dark:bg-stone-800 flex items-center justify-center text-stone-500 dark:text-stone-400"><i class="fas fa-phone"></i></div>
-                                    ${workshop.phone}
+                                    <a href="tel:${workshop.phone}" class="hover:underline">${workshop.phone}</a>
+                                </div>
+                                <div class="flex items-center gap-3 text-sm text-bhat-ink dark:text-bhat-darkInk">
+                                    <div class="w-8 h-8 rounded-full bg-stone-50 dark:bg-stone-800 flex items-center justify-center text-green-500 dark:text-green-400"><i class="fab fa-whatsapp"></i></div>
+                                    <a href="https://wa.me/91${workshop.phone}?text=Hi,%20I%20found%20your%20workshop%20on%20Bhat%20Network.%20I%20need%20help%20with%20my%20bike..." target="_blank" class="hover:underline text-green-600 dark:text-green-400">Chat on WhatsApp</a>
                                 </div>
                             </div>
 
@@ -1167,9 +1234,27 @@
                             <div class="rounded-2xl overflow-hidden border border-stone-200 dark:border-stone-700 h-64 mb-6 relative bg-stone-100 dark:bg-stone-800 shadow-inner">
                                 <iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=${encodeURIComponent(workshop.name + ' ' + workshop.location)}&t=&z=14&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
                             </div>
-                            <button onclick="openBookingModal('${workshop.id}'); closeWorkshopDetailModal();" class="w-full ripple btn-dark bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-all shadow-md">
-                                Book Appointment
+                            <button onclick="openBookingModal('${workshop.id}'); closeWorkshopDetailModal();" class="w-full ripple btn-dark bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-all shadow-md mb-8">
+                                Book Appointment / Request Quote
                             </button>
+
+                            <h4 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-4">Reviews & Ratings</h4>
+                            <div id="workshopReviewsList" class="space-y-3 mb-4 max-h-48 overflow-y-auto pr-2 scrollbar-hide">
+                                <!-- Reviews injected here -->
+                            </div>
+                            <form id="reviewForm" onsubmit="submitReview(event, '${workshop.id}')" class="bg-stone-50 dark:bg-stone-800/50 p-4 rounded-2xl border border-stone-100 dark:border-stone-700">
+                                <div class="mb-3">
+                                    <select id="reviewRating" class="w-full bg-white dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-xl p-2.5 text-sm outline-none text-bhat-ink dark:text-bhat-darkInk" required>
+                                        <option value="5">⭐⭐⭐⭐⭐ (5/5) - Excellent</option>
+                                        <option value="4">⭐⭐⭐⭐ (4/5) - Very Good</option>
+                                        <option value="3">⭐⭐⭐ (3/5) - Average</option>
+                                        <option value="2">⭐⭐ (2/5) - Poor</option>
+                                        <option value="1">⭐ (1/5) - Terrible</option>
+                                    </select>
+                                </div>
+                                <textarea id="reviewText" placeholder="Write your review..." class="w-full bg-white dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-xl p-3 text-sm outline-none resize-none mb-3 text-bhat-ink dark:text-bhat-darkInk" rows="2" required></textarea>
+                                <button type="submit" class="w-full bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-colors">Submit Review</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -1180,6 +1265,8 @@
             modal.classList.remove('opacity-0');
             content.classList.remove('scale-95');
             content.classList.add('scale-100');
+            
+            renderReviews(workshop.id);
         }
 
         function closeWorkshopDetailModal() {
@@ -1224,15 +1311,80 @@
             const id = document.getElementById('bookingWorkshopId').value;
             const date = document.getElementById('bookingDate').value;
             const time = document.getElementById('bookingTime').value;
+            const serviceType = document.getElementById('bookingServiceType').value;
             const vehicle = document.getElementById('bookingVehicle').value;
 
-            bookings.push({ id: Date.now(), workshopId: id, date, time, vehicle, status: 'Pending' });
+            bookings.push({ id: Date.now(), workshopId: id, date, time, serviceType, vehicle, status: 'Pending' });
             localStorage.setItem('bhat_bookings', JSON.stringify(bookings));
 
             closeBookingModal();
             e.target.reset();
             showModal('Your appointment has been booked successfully! The workshop will contact you soon.');
         });
+
+        // Reviews Logic
+        let reviewsDB = JSON.parse(localStorage.getItem('bhat_reviews')) || {};
+
+        function submitReview(event, workshopId) {
+            event.preventDefault();
+            const rating = parseInt(document.getElementById('reviewRating').value);
+            const text = document.getElementById('reviewText').value;
+            
+            if (!reviewsDB[workshopId]) {
+                reviewsDB[workshopId] = [];
+            }
+            
+            reviewsDB[workshopId].unshift({
+                user: currentUser,
+                rating: rating,
+                text: text,
+                date: new Date().toLocaleDateString()
+            });
+            
+            localStorage.setItem('bhat_reviews', JSON.stringify(reviewsDB));
+            
+            // Recalculate average rating
+            const workshop = allWorkshops.find(w => w.id === workshopId);
+            if (workshop) {
+                const total = reviewsDB[workshopId].reduce((sum, r) => sum + r.rating, 0);
+                workshop.rating = (total / reviewsDB[workshopId].length).toFixed(1);
+                
+                // Update in storage
+                const wsIndex = userWorkshops.findIndex(w => w.id === workshopId);
+                if (wsIndex > -1) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                const dbIndex = workshopsDB.findIndex(w => w.id === workshopId);
+                if (dbIndex > -1) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+            }
+            
+            document.getElementById('reviewForm').reset();
+            renderReviews(workshopId);
+            
+            if(document.getElementById('explore').classList.contains('active')) {
+                renderWorkshops(allWorkshops);
+            }
+        }
+
+        function renderReviews(workshopId) {
+            const list = document.getElementById('workshopReviewsList');
+            if (!list) return;
+            
+            const reviews = reviewsDB[workshopId] || [];
+            if (reviews.length === 0) {
+                list.innerHTML = '<p class="text-xs text-stone-500 dark:text-stone-400 italic">No reviews yet. Be the first to review!</p>';
+                return;
+            }
+            
+            list.innerHTML = reviews.map(r => `
+                <div class="bg-white dark:bg-[#121212] p-3 rounded-xl border border-stone-100 dark:border-stone-800">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-xs font-bold text-bhat-ink dark:text-bhat-darkInk">${r.user}</span>
+                        <span class="text-[10px] text-stone-400">${r.date}</span>
+                    </div>
+                    <div class="text-[10px] mb-1">${'⭐'.repeat(r.rating)}</div>
+                    <p class="text-xs text-stone-600 dark:text-stone-400">${r.text}</p>
+                </div>
+            `).join('');
+        }
 
         // Dashboard Logic
         function loginMechanic() {
@@ -1581,9 +1733,47 @@
         });
     </script>
 
+    <!-- Floating Emergency SOS Button -->
+    <button onclick="triggerSOS()" class="fixed bottom-40 md:bottom-24 right-6 z-50 w-14 h-14 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-2xl shadow-lg transition-colors sos-float" title="Emergency SOS">
+        <i class="fas fa-exclamation-triangle"></i>
+    </button>
+
     <!-- Floating WhatsApp Button -->
-    <a href="https://wa.me/919906584655" target="_blank" class="fixed bottom-24 md:bottom-8 right-6 z-50 w-14 h-14 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full flex items-center justify-center text-3xl shadow-lg transition-colors whatsapp-float">
+    <a href="https://wa.me/919906584655" target="_blank" class="fixed bottom-24 md:bottom-8 right-6 z-50 w-14 h-14 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full flex items-center justify-center text-3xl shadow-lg transition-colors whatsapp-float" title="Contact Admin">
         <i class="fab fa-whatsapp"></i>
     </a>
+
+    <script>
+        function triggerSOS() {
+            if (navigator.geolocation) {
+                showModal("Locating you... Please wait.");
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        const mapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+                        const message = `🚨 EMERGENCY SOS 🚨\nI am stranded and need immediate mechanic assistance. Here is my exact location:\n${mapsLink}`;
+                        
+                        // Find the first open workshop (in a real app, this would find the closest one)
+                        let targetPhone = '9906584655'; // Default to admin
+                        const openWorkshops = allWorkshops.filter(w => localStorage.getItem('status_' + w.id) !== 'closed');
+                        if (openWorkshops.length > 0) {
+                            targetPhone = openWorkshops[0].phone;
+                        }
+
+                        const whatsappUrl = `https://wa.me/91${targetPhone}?text=${encodeURIComponent(message)}`;
+                        closeModal();
+                        window.open(whatsappUrl, '_blank');
+                    },
+                    (error) => {
+                        closeModal();
+                        alert("Unable to get your location. Please ensure location services are enabled.");
+                    }
+                );
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+    </script>
 </body>
 </html>
