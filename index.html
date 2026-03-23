@@ -884,11 +884,18 @@
                 localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
                 allWorkshops.push(newWorkshop);
                 
+                mechanicLoggedIn = true;
+                mechanicPhone = newWorkshop.phone;
+                localStorage.setItem('bhat_mechanic_logged_in', 'true');
+                localStorage.setItem('bhat_mechanic_phone', mechanicPhone);
+                
                 updateAddTabVisibility();
                 
                 e.target.reset();
                 showModal('Workshop registered successfully! It is now live on the network.');
                 renderWorkshops(allWorkshops);
+                renderDashboard();
+                navigate('dashboard');
             });
         });
 
@@ -1501,9 +1508,32 @@
             ownedWorkshops.forEach(w => {
                 const savesCount = Math.floor(Math.random() * 50) + 10;
                 const isOpen = localStorage.getItem('status_' + w.id) !== 'closed';
+                const wBookings = bookings.filter(b => b.workshopId === w.id);
+                const wReviews = reviewsDB[w.id] || [];
+                
+                let bookingsHtml = wBookings.length > 0 ? wBookings.map(b => `
+                    <div class="bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-100 dark:border-stone-700 flex justify-between items-center">
+                        <div>
+                            <div class="text-xs font-bold text-bhat-ink dark:text-bhat-darkInk">${b.serviceType || 'General Service'}</div>
+                            <div class="text-[10px] text-stone-500 dark:text-stone-400">${b.date} at ${b.time} - ${b.vehicle || 'No vehicle info'}</div>
+                        </div>
+                        <span class="px-2 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-md text-[9px] font-bold uppercase">${b.status}</span>
+                    </div>
+                `).join('') : '<p class="text-xs text-stone-500 dark:text-stone-400 italic">No bookings yet.</p>';
+
+                let reviewsHtml = wReviews.length > 0 ? wReviews.map(r => `
+                    <div class="bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-100 dark:border-stone-700">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="text-xs font-bold text-bhat-ink dark:text-bhat-darkInk">${r.user}</span>
+                            <span class="text-[10px] text-stone-400">${r.date}</span>
+                        </div>
+                        <div class="text-[10px] mb-1">${'⭐'.repeat(r.rating)}</div>
+                        <p class="text-xs text-stone-600 dark:text-stone-400">${r.text}</p>
+                    </div>
+                `).join('') : '<p class="text-xs text-stone-500 dark:text-stone-400 italic">No reviews yet.</p>';
 
                 html += `
-                    <div class="bg-white dark:bg-bhat-darkSurface border border-stone-100 dark:border-stone-800 p-6 md:p-8 rounded-[2rem] shadow-sm">
+                    <div class="bg-white dark:bg-bhat-darkSurface border border-stone-100 dark:border-stone-800 p-6 md:p-8 rounded-[2rem] shadow-sm flex flex-col gap-6">
                         <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
                             <img src="${w.image}" class="w-24 h-24 rounded-2xl object-cover border border-stone-200 dark:border-stone-700">
                             <div class="flex-1">
@@ -1520,8 +1550,12 @@
                                         <div class="text-[10px] uppercase tracking-wider text-stone-400">Saves</div>
                                     </div>
                                     <div class="text-center">
-                                        <div class="text-xl font-bold text-bhat-ink dark:text-bhat-darkInk">${bookings.filter(b => b.workshopId === w.id).length}</div>
+                                        <div class="text-xl font-bold text-bhat-ink dark:text-bhat-darkInk">${wBookings.length}</div>
                                         <div class="text-[10px] uppercase tracking-wider text-stone-400">Bookings</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-xl font-bold text-bhat-ink dark:text-bhat-darkInk">${wReviews.length}</div>
+                                        <div class="text-[10px] uppercase tracking-wider text-stone-400">Reviews</div>
                                     </div>
                                 </div>
                             </div>
@@ -1538,6 +1572,21 @@
                                 <button onclick="deleteWorkshop('${w.id}')" class="bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40 text-red-500 dark:text-red-400 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors">
                                     Delete Workshop
                                 </button>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-stone-100 dark:border-stone-800">
+                            <div>
+                                <h4 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-3">Recent Bookings</h4>
+                                <div class="space-y-2 max-h-60 overflow-y-auto pr-2 scrollbar-hide">
+                                    ${bookingsHtml}
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-3">Customer Reviews</h4>
+                                <div class="space-y-2 max-h-60 overflow-y-auto pr-2 scrollbar-hide">
+                                    ${reviewsHtml}
+                                </div>
                             </div>
                         </div>
                     </div>
