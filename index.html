@@ -894,6 +894,17 @@
                 localStorage.setItem('bhat_mechanic_logged_in', 'true');
                 localStorage.setItem('bhat_mechanic_phone', mechanicPhone);
                 
+                currentUser = newWorkshop.owner;
+                localStorage.setItem('bhat_user', currentUser);
+                document.getElementById('profileNameDisplay').textContent = currentUser;
+                
+                profilePhoto = newWorkshop.image;
+                localStorage.setItem('bhat_profile_photo', profilePhoto);
+                document.getElementById('profileIcon').classList.add('hidden');
+                const img = document.getElementById('profileImage');
+                img.src = profilePhoto;
+                img.classList.remove('hidden');
+
                 updateAddTabVisibility();
                 
                 e.target.reset();
@@ -922,6 +933,7 @@
             
             if(pageId === 'profile') renderFollowed();
             if(pageId === 'explore') renderWorkshops(allWorkshops);
+            if(pageId === 'dashboard') renderDashboard();
         }
 
         function renderWorkshops(workshops) {
@@ -1105,6 +1117,34 @@
                 currentUser = newName.trim();
                 localStorage.setItem('bhat_user', currentUser);
                 document.getElementById('profileNameDisplay').textContent = currentUser;
+                
+                if (mechanicLoggedIn && mechanicPhone) {
+                    let updated = false;
+                    userWorkshops.forEach(w => {
+                        if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
+                            w.owner = currentUser;
+                            updated = true;
+                        }
+                    });
+                    if (updated) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                    
+                    workshopsDB.forEach(w => {
+                        if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
+                            w.owner = currentUser;
+                            updated = true;
+                        }
+                    });
+                    if (updated) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                    
+                    if (updated) {
+                        allWorkshops = [...workshopsDB, ...userWorkshops];
+                        renderDashboard();
+                        if(document.getElementById('explore').classList.contains('active')) {
+                            renderWorkshops(allWorkshops);
+                        }
+                    }
+                }
+                
                 closeEditProfileModal();
             }
         }
@@ -1120,6 +1160,38 @@
                     const img = document.getElementById('profileImage');
                     img.src = profilePhoto;
                     img.classList.remove('hidden');
+                    
+                    if (mechanicLoggedIn && mechanicPhone) {
+                        let updated = false;
+                        userWorkshops.forEach(w => {
+                            if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
+                                w.image = profilePhoto;
+                                if (!w.gallery) w.gallery = [];
+                                w.gallery.unshift(profilePhoto);
+                                updated = true;
+                            }
+                        });
+                        if (updated) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                        
+                        workshopsDB.forEach(w => {
+                            if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
+                                w.image = profilePhoto;
+                                if (!w.gallery) w.gallery = [];
+                                w.gallery.unshift(profilePhoto);
+                                updated = true;
+                            }
+                        });
+                        if (updated) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                        
+                        if (updated) {
+                            allWorkshops = [...workshopsDB, ...userWorkshops];
+                            renderDashboard();
+                            if(document.getElementById('explore').classList.contains('active')) {
+                                renderWorkshops(allWorkshops);
+                            }
+                            updateFeaturedWorkshopDOM();
+                        }
+                    }
                 };
                 reader.readAsDataURL(file);
             }
@@ -1433,6 +1505,8 @@
                 if (wsIndex > -1) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
                 const dbIndex = workshopsDB.findIndex(w => w.id === workshopId);
                 if (dbIndex > -1) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                
+                allWorkshops = [...workshopsDB, ...userWorkshops];
             }
             
             document.getElementById('reviewForm').reset();
@@ -1471,6 +1545,8 @@
                     if (wsIndex > -1) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
                     const dbIndex = workshopsDB.findIndex(w => w.id === workshopId);
                     if (dbIndex > -1) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                    
+                    allWorkshops = [...workshopsDB, ...userWorkshops];
                 }
                 
                 document.getElementById('reviewForm').reset();
@@ -1770,13 +1846,13 @@
                 }
             }
             
-            const allWsIndex = allWorkshops.findIndex(w => w.id === id);
-            if (allWsIndex > -1) {
-                allWorkshops[allWsIndex].name = name;
-                allWorkshops[allWsIndex].owner = owner;
-                allWorkshops[allWsIndex].location = location;
-                allWorkshops[allWsIndex].services = services;
-                allWorkshops[allWsIndex].links = links;
+            allWorkshops = [...workshopsDB, ...userWorkshops];
+            
+            const workshop = allWorkshops.find(w => w.id === id);
+            if (workshop && workshop.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
+                currentUser = workshop.owner;
+                localStorage.setItem('bhat_user', currentUser);
+                document.getElementById('profileNameDisplay').textContent = currentUser;
             }
 
             closeEditWorkshopModal();
@@ -1870,10 +1946,16 @@
                         return;
                     }
                     
-                    const allWsIndex = allWorkshops.findIndex(w => w.id === id);
-                    if(allWsIndex > -1) {
-                        allWorkshops[allWsIndex].image = mainUrl;
-                        allWorkshops[allWsIndex].gallery = newUrls;
+                    allWorkshops = [...workshopsDB, ...userWorkshops];
+                    
+                    const workshop = allWorkshops.find(w => w.id === id);
+                    if (workshop && workshop.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
+                        profilePhoto = workshop.image;
+                        localStorage.setItem('bhat_profile_photo', profilePhoto);
+                        document.getElementById('profileIcon').classList.add('hidden');
+                        const img = document.getElementById('profileImage');
+                        img.src = profilePhoto;
+                        img.classList.remove('hidden');
                     }
                     
                     renderDashboard();
