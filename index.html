@@ -698,6 +698,11 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         let currentUser = localStorage.getItem('bhat_user') || 'Guest User';
+        let currentUserId = localStorage.getItem('bhat_user_id');
+        if (!currentUserId) {
+            currentUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('bhat_user_id', currentUserId);
+        }
         let followedWorkshops = JSON.parse(localStorage.getItem('bhat_followed')) || [];
         let isDarkMode = localStorage.getItem('bhat_dark_mode') === 'true';
         let mechanicLoggedIn = localStorage.getItem('bhat_mechanic_logged_in') === 'true';
@@ -865,7 +870,7 @@
                 
                 const existing = allWorkshops.find(w => w.phone.replace(/\s/g, '') === phoneVal.replace(/\s/g, ''));
                 if (existing) {
-                    alert("A workshop with this phone number is already registered. Please use the dashboard to manage it.");
+                    showModal("A workshop with this phone number is already registered. Please use the dashboard to manage it.");
                     return;
                 }
 
@@ -1310,6 +1315,13 @@
             content.classList.add('scale-100');
             
             renderReviews(workshop.id);
+            
+            const existingReview = (reviewsDB[workshop.id] || []).find(r => r.userId === currentUserId);
+            if (existingReview) {
+                document.getElementById('reviewRating').value = existingReview.rating;
+                document.getElementById('reviewText').value = existingReview.text;
+                document.querySelector('#reviewForm button[type="submit"]').textContent = 'Update Review';
+            }
         }
 
         function closeWorkshopDetailModal() {
@@ -1391,12 +1403,22 @@
                 reviewsDB[workshopId] = [];
             }
             
-            reviewsDB[workshopId].unshift({
+            const existingIndex = reviewsDB[workshopId].findIndex(r => r.userId === currentUserId);
+            
+            const reviewObj = {
+                id: existingIndex > -1 ? reviewsDB[workshopId][existingIndex].id : 'rev_' + Date.now(),
+                userId: currentUserId,
                 user: currentUser,
                 rating: rating,
                 text: text,
                 date: new Date().toLocaleDateString()
-            });
+            };
+            
+            if (existingIndex > -1) {
+                reviewsDB[workshopId][existingIndex] = reviewObj;
+            } else {
+                reviewsDB[workshopId].unshift(reviewObj);
+            }
             
             localStorage.setItem('bhat_reviews', JSON.stringify(reviewsDB));
             
@@ -1414,11 +1436,51 @@
             }
             
             document.getElementById('reviewForm').reset();
+            document.querySelector('#reviewForm button[type="submit"]').textContent = 'Submit Review';
             renderReviews(workshopId);
             
             if(document.getElementById('explore').classList.contains('active')) {
                 renderWorkshops(allWorkshops);
             }
+        }
+
+        function editReview(workshopId) {
+            const review = reviewsDB[workshopId].find(r => r.userId === currentUserId);
+            if (review) {
+                document.getElementById('reviewRating').value = review.rating;
+                document.getElementById('reviewText').value = review.text;
+                document.querySelector('#reviewForm button[type="submit"]').textContent = 'Update Review';
+                document.getElementById('reviewForm').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function deleteReview(workshopId, reviewId) {
+            showConfirmModal("Are you sure you want to delete your review?", () => {
+                reviewsDB[workshopId] = reviewsDB[workshopId].filter(r => r.id !== reviewId);
+                localStorage.setItem('bhat_reviews', JSON.stringify(reviewsDB));
+                
+                const workshop = allWorkshops.find(w => w.id === workshopId);
+                if (workshop) {
+                    if (reviewsDB[workshopId].length > 0) {
+                        const total = reviewsDB[workshopId].reduce((sum, r) => sum + r.rating, 0);
+                        workshop.rating = (total / reviewsDB[workshopId].length).toFixed(1);
+                    } else {
+                        workshop.rating = 5.0;
+                    }
+                    const wsIndex = userWorkshops.findIndex(w => w.id === workshopId);
+                    if (wsIndex > -1) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                    const dbIndex = workshopsDB.findIndex(w => w.id === workshopId);
+                    if (dbIndex > -1) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                }
+                
+                document.getElementById('reviewForm').reset();
+                document.querySelector('#reviewForm button[type="submit"]').textContent = 'Submit Review';
+                renderReviews(workshopId);
+                
+                if(document.getElementById('explore').classList.contains('active')) {
+                    renderWorkshops(allWorkshops);
+                }
+            });
         }
 
         function renderReviews(workshopId) {
@@ -1432,13 +1494,19 @@
             }
             
             list.innerHTML = reviews.map(r => `
-                <div class="bg-white dark:bg-[#121212] p-3 rounded-xl border border-stone-100 dark:border-stone-800">
+                <div class="bg-white dark:bg-[#121212] p-3 rounded-xl border border-stone-100 dark:border-stone-800 relative">
                     <div class="flex justify-between items-start mb-1">
                         <span class="text-xs font-bold text-bhat-ink dark:text-bhat-darkInk">${r.user}</span>
                         <span class="text-[10px] text-stone-400">${r.date}</span>
                     </div>
                     <div class="text-[10px] mb-1">${'⭐'.repeat(r.rating)}</div>
                     <p class="text-xs text-stone-600 dark:text-stone-400">${r.text}</p>
+                    ${r.userId === currentUserId ? `
+                        <div class="absolute top-2 right-2 flex gap-3">
+                            <button onclick="editReview('${workshopId}')" class="text-blue-500 hover:text-blue-600 text-xs" title="Edit Review"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteReview('${workshopId}', '${r.id}')" class="text-red-500 hover:text-red-600 text-xs" title="Delete Review"><i class="fas fa-trash"></i></button>
+                        </div>
+                    ` : ''}
                 </div>
             `).join('');
         }
@@ -1454,7 +1522,7 @@
                 updateAddTabVisibility();
                 renderDashboard();
             } else {
-                alert("Please enter a valid phone number.");
+                showModal("Please enter a valid phone number.");
             }
         }
 
@@ -1506,18 +1574,30 @@
             `;
 
             ownedWorkshops.forEach(w => {
-                const savesCount = Math.floor(Math.random() * 50) + 10;
+                let savesCount = localStorage.getItem('saves_' + w.id);
+                if (!savesCount) {
+                    savesCount = Math.floor(Math.random() * 50) + 10;
+                    localStorage.setItem('saves_' + w.id, savesCount);
+                }
                 const isOpen = localStorage.getItem('status_' + w.id) !== 'closed';
                 const wBookings = bookings.filter(b => b.workshopId === w.id);
                 const wReviews = reviewsDB[w.id] || [];
                 
                 let bookingsHtml = wBookings.length > 0 ? wBookings.map(b => `
-                    <div class="bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-100 dark:border-stone-700 flex justify-between items-center">
-                        <div>
-                            <div class="text-xs font-bold text-bhat-ink dark:text-bhat-darkInk">${b.serviceType || 'General Service'}</div>
-                            <div class="text-[10px] text-stone-500 dark:text-stone-400">${b.date} at ${b.time} - ${b.vehicle || 'No vehicle info'}</div>
+                    <div class="bg-stone-50 dark:bg-stone-800/50 p-4 rounded-xl border border-stone-100 dark:border-stone-700 flex flex-col gap-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="text-sm font-bold text-bhat-ink dark:text-bhat-darkInk">${b.name} <a href="tel:${b.phone}" class="text-blue-500 ml-1"><i class="fas fa-phone"></i> ${b.phone}</a></div>
+                                <div class="text-xs font-semibold text-stone-600 dark:text-stone-300 mt-1">${b.serviceType || 'General Service'} - ${b.vehicle || 'No vehicle info'}</div>
+                                <div class="text-[10px] text-stone-500 dark:text-stone-400">${b.date} at ${b.time}</div>
+                            </div>
+                            <select onchange="updateBookingStatus('${b.id}', this.value)" class="text-xs border border-stone-200 dark:border-stone-600 rounded px-2 py-1 bg-white dark:bg-stone-700 text-bhat-ink dark:text-bhat-darkInk outline-none">
+                                <option value="Pending" ${b.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Confirmed" ${b.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                <option value="Completed" ${b.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                                <option value="Cancelled" ${b.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
                         </div>
-                        <span class="px-2 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-md text-[9px] font-bold uppercase">${b.status}</span>
                     </div>
                 `).join('') : '<p class="text-xs text-stone-500 dark:text-stone-400 italic">No bookings yet.</p>';
 
@@ -1596,6 +1676,15 @@
             contentSection.innerHTML = html;
         }
 
+        function updateBookingStatus(bookingId, newStatus) {
+            const bIndex = bookings.findIndex(b => b.id === bookingId);
+            if (bIndex > -1) {
+                bookings[bIndex].status = newStatus;
+                localStorage.setItem('bhat_bookings', JSON.stringify(bookings));
+                renderDashboard();
+            }
+        }
+
         function openEditWorkshopModal(id) {
             let workshop = userWorkshops.find(w => w.id === id);
             let isDBWorkshop = false;
@@ -1604,7 +1693,7 @@
                 if (workshop && mechanicPhone === '9906584655') {
                     isDBWorkshop = true;
                 } else {
-                    alert("You can only edit workshops you have registered.");
+                    showModal("You can only edit workshops you have registered.");
                     return;
                 }
             }
@@ -1777,7 +1866,7 @@
                             localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
                         }
                     } else {
-                        alert("You can only update photos for workshops you registered.");
+                        showModal("You can only update photos for workshops you registered.");
                         return;
                     }
                     
