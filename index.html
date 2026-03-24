@@ -1618,20 +1618,54 @@
             userBookings.forEach(b => {
                 const workshop = allWorkshops.find(w => w.id === b.workshopId);
                 const wsName = workshop ? workshop.name : 'Unknown Workshop';
+                const wsLocation = workshop ? workshop.location : 'Unknown Location';
                 const item = document.createElement('div');
-                item.className = 'bg-white border border-stone-100 shadow-sm p-4 rounded-2xl flex flex-col gap-2';
+                item.className = 'bg-white dark:bg-bhat-darkSurface border border-stone-100 dark:border-stone-800 shadow-sm p-5 rounded-2xl flex flex-col gap-3';
+                
+                let cancelButtonHtml = '';
+                if (b.status !== 'Cancelled' && b.status !== 'Completed') {
+                    cancelButtonHtml = `<button onclick="cancelBooking('${b.id}')" class="mt-2 text-xs text-red-500 hover:text-red-700 font-medium transition-colors self-start">Cancel Booking</button>`;
+                }
+
                 item.innerHTML = `
                     <div class="flex justify-between items-start">
                         <div>
-                            <h4 class="font-serif font-medium text-bhat-ink">${wsName}</h4>
-                            <p class="text-xs text-stone-500 font-medium">${b.serviceType} - ${b.vehicle || 'No vehicle info'}</p>
+                            <h4 class="font-serif font-medium text-bhat-ink dark:text-bhat-darkInk text-lg">${wsName}</h4>
+                            <p class="text-xs text-stone-500 dark:text-stone-400 font-medium mt-1"><i class="fas fa-map-marker-alt mr-1"></i> ${wsLocation}</p>
                         </div>
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${b.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' : b.status === 'Completed' ? 'bg-green-100 text-green-700' : b.status === 'Cancelled' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}">${b.status}</span>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${b.status === 'Confirmed' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : b.status === 'Completed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : b.status === 'Cancelled' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}">${b.status}</span>
                     </div>
-                    <div class="text-[10px] text-stone-400 font-semibold"><i class="far fa-calendar-alt mr-1"></i> ${b.date} at ${b.time}</div>
+                    <div class="bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl mt-2">
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                                <span class="text-stone-400 text-[10px] uppercase tracking-wider block mb-0.5">Service</span>
+                                <span class="font-medium text-bhat-ink dark:text-bhat-darkInk">${b.serviceType}</span>
+                            </div>
+                            <div>
+                                <span class="text-stone-400 text-[10px] uppercase tracking-wider block mb-0.5">Vehicle</span>
+                                <span class="font-medium text-bhat-ink dark:text-bhat-darkInk">${b.vehicle || 'Not specified'}</span>
+                            </div>
+                            <div>
+                                <span class="text-stone-400 text-[10px] uppercase tracking-wider block mb-0.5">Date & Time</span>
+                                <span class="font-medium text-bhat-ink dark:text-bhat-darkInk"><i class="far fa-calendar-alt mr-1"></i> ${b.date} at ${b.time}</span>
+                            </div>
+                            <div>
+                                <span class="text-stone-400 text-[10px] uppercase tracking-wider block mb-0.5">Booking ID</span>
+                                <span class="font-mono text-xs text-stone-500 dark:text-stone-400">${b.id.substring(0, 8)}</span>
+                            </div>
+                        </div>
+                        ${b.notes ? `<div class="mt-2 pt-2 border-t border-stone-200 dark:border-stone-700"><span class="text-stone-400 text-[10px] uppercase tracking-wider block mb-0.5">Notes</span><p class="text-xs text-stone-600 dark:text-stone-300">${b.notes}</p></div>` : ''}
+                    </div>
+                    ${cancelButtonHtml}
                 `;
                 list.appendChild(item);
             });
+        }
+
+        function cancelBooking(bookingId) {
+            if (confirm('Are you sure you want to cancel this booking?')) {
+                updateBookingStatus(bookingId, 'Cancelled');
+            }
         }
 
         // Reviews Logic
