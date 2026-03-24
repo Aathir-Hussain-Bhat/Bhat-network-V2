@@ -450,13 +450,12 @@
 
                 <div id="dashboardLogin" class="bg-white dark:bg-bhat-darkSurface border border-stone-100 dark:border-stone-800 shadow-[0_8px_30px_rgba(0,0,0,0.03)] p-8 md:p-10 rounded-[2rem] max-w-md mx-auto text-center" data-aos="fade-up">
                     <div class="w-16 h-16 bg-stone-50 dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-6 border border-stone-100 dark:border-stone-700">
-                        <i class="fas fa-lock"></i>
+                        <i class="fab fa-google"></i>
                     </div>
-                    <h3 class="text-xl font-serif font-medium mb-4 text-bhat-ink dark:text-bhat-darkInk">Owner Login</h3>
-                    <p class="text-sm text-stone-500 dark:text-stone-400 mb-6">Enter your phone number to access your dashboard.</p>
-                    <input type="tel" id="mechanicPhoneInput" class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent focus:ring-1 focus:ring-bhat-ink dark:focus:ring-bhat-darkAccent outline-none transition-all mb-6" placeholder="e.g. 099065 84655">
-                    <button onclick="loginMechanic()" class="w-full ripple btn-dark bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-all shadow-md">
-                        Login
+                    <h3 class="text-xl font-serif font-medium mb-4 text-bhat-ink dark:text-bhat-darkInk">Sign In</h3>
+                    <p class="text-sm text-stone-500 dark:text-stone-400 mb-6">Sign in with Google to access your dashboard and profile.</p>
+                    <button onclick="loginWithGoogle()" class="w-full ripple btn-dark bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-all shadow-md flex items-center justify-center gap-2">
+                        <i class="fab fa-google"></i> Continue with Google
                     </button>
                 </div>
 
@@ -728,21 +727,23 @@
         </div>
     </div>
 
+    <script type="module" src="./firebase.js"></script>
+    <script src="./sync.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        let currentUser = localStorage.getItem('bhat_user') || 'Guest User';
-        let currentUserId = localStorage.getItem('bhat_user_id');
+        var currentUser = localStorage.getItem('bhat_user') || 'Guest User';
+        var currentUserId = localStorage.getItem('bhat_user_id');
         if (!currentUserId) {
             currentUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('bhat_user_id', currentUserId);
         }
-        let followedWorkshops = JSON.parse(localStorage.getItem('bhat_followed')) || [];
-        let isDarkMode = localStorage.getItem('bhat_dark_mode') === 'true';
-        let mechanicLoggedIn = localStorage.getItem('bhat_mechanic_logged_in') === 'true';
-        let mechanicPhone = localStorage.getItem('bhat_mechanic_phone') || '';
-        let bookings = JSON.parse(localStorage.getItem('bhat_bookings')) || [];
-        let profilePhoto = localStorage.getItem('bhat_profile_photo');
+        var followedWorkshops = JSON.parse(localStorage.getItem('bhat_followed')) || [];
+        var isDarkMode = localStorage.getItem('bhat_dark_mode') === 'true';
+        var mechanicLoggedIn = localStorage.getItem('bhat_mechanic_logged_in') === 'true';
+        var mechanicPhone = localStorage.getItem('bhat_mechanic_phone') || '';
+        var bookings = JSON.parse(localStorage.getItem('bhat_bookings')) || [];
+        var profilePhoto = localStorage.getItem('bhat_profile_photo');
 
         // Apply dark mode initially
         if (isDarkMode) {
@@ -759,16 +760,16 @@
             }
         }
         
-        const defaultWorkshopsDB = [
-            { id: 'aashaq-bike-point', name: 'Aashaq Bike Point', location: 'Villagam', phone: '9906584655', services: ['Repair', 'Service', 'Parts'], rating: 5.0, image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=500&auto=format&fit=crop', links: { call: '+919906584655', directions: 'https://g.co/kgs/jH8xfRi', youtube: 'https://youtube.com/@aashaqbikepoint?si=XMJbbCSTaWaL7yU8', instagram: 'https://www.instagram.com/aashaq_bike_point_villagam' } },
-            { id: 'ws-2', name: 'Royal Enfield Masters', location: 'Srinagar', phone: '9876543210', services: ['Engine Rebuild', 'Customization'], rating: 4.8, image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=500&auto=format&fit=crop' },
-            { id: 'ws-3', name: 'Valley Auto Care', location: 'Anantnag', phone: '9876543211', services: ['Car Wash', 'Detailing', 'Oil Change'], rating: 4.5, image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=500&auto=format&fit=crop' },
-            { id: 'ws-4', name: 'Speed Moto Tech', location: 'Baramulla', phone: '9876543212', services: ['Diagnostics', 'Electrical'], rating: 4.7, image: 'https://images.unsplash.com/photo-1625047509168-a71c6f959828?q=80&w=500&auto=format&fit=crop' },
+        var defaultWorkshopsDB = [
+            { id: 'aashaq-bike-point', name: 'Aashaq Bike Point', owner: 'Aashaq', ownerId: 'admin', address: 'Villagam', location: 'Villagam', phone: '9906584655', services: ['Repair', 'Service', 'Parts'], rating: 5.0, reviewsCount: 0, isOpen: true, savesCount: 15, image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=500&auto=format&fit=crop', links: { call: '+919906584655', directions: 'https://g.co/kgs/jH8xfRi', youtube: 'https://youtube.com/@aashaqbikepoint?si=XMJbbCSTaWaL7yU8', instagram: 'https://www.instagram.com/aashaq_bike_point_villagam' } },
+            { id: 'ws-2', name: 'Royal Enfield Masters', owner: 'Unknown', ownerId: 'ws-2-owner', address: 'Srinagar', location: 'Srinagar', phone: '9876543210', services: ['Engine Rebuild', 'Customization'], rating: 4.8, reviewsCount: 0, isOpen: true, savesCount: 12, image: 'https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=500&auto=format&fit=crop' },
+            { id: 'ws-3', name: 'Valley Auto Care', owner: 'Unknown', ownerId: 'ws-3-owner', address: 'Anantnag', location: 'Anantnag', phone: '9876543211', services: ['Car Wash', 'Detailing', 'Oil Change'], rating: 4.5, reviewsCount: 0, isOpen: true, savesCount: 8, image: 'https://images.unsplash.com/photo-1605810230434-7631ac76ec81?q=80&w=500&auto=format&fit=crop' },
+            { id: 'ws-4', name: 'Speed Moto Tech', owner: 'Unknown', ownerId: 'ws-4-owner', address: 'Baramulla', location: 'Baramulla', phone: '9876543212', services: ['Diagnostics', 'Electrical'], rating: 4.7, reviewsCount: 0, isOpen: true, savesCount: 20, image: 'https://images.unsplash.com/photo-1625047509168-a71c6f959828?q=80&w=500&auto=format&fit=crop' },
         ];
 
-        let workshopsDB = JSON.parse(localStorage.getItem('bhat_workshops_db')) || defaultWorkshopsDB;
-        const userWorkshops = JSON.parse(localStorage.getItem('bhat_user_workshops')) || [];
-        let allWorkshops = [...workshopsDB, ...userWorkshops];
+        var workshopsDB = JSON.parse(localStorage.getItem('bhat_workshops_db')) || defaultWorkshopsDB;
+        var userWorkshops = JSON.parse(localStorage.getItem('bhat_user_workshops')) || [];
+        var allWorkshops = [...workshopsDB, ...userWorkshops];
 
         function updateAddTabVisibility() {
             const addBtns = document.querySelectorAll('[onclick="navigate(\'add\')"]');
@@ -929,20 +930,30 @@
                     id: 'user-ws-' + Date.now(),
                     name: document.getElementById('wName').value,
                     owner: document.getElementById('wOwner').value,
+                    ownerId: currentUserId || 'guest',
                     phone: document.getElementById('wPhone').value,
                     location: document.getElementById('wLocation').value,
+                    address: document.getElementById('wLocation').value,
                     services: document.getElementById('wServices').value.split(',').map(s => s.trim()),
                     rating: 5.0,
+                    reviewsCount: 0,
                     image: mainImage,
                     gallery: gallery,
+                    isOpen: true,
+                    savesCount: 0,
                     links: {
                         website: document.getElementById('wWebsite').value || ''
                     }
                 };
 
-                userWorkshops.push(newWorkshop);
-                localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
-                allWorkshops.push(newWorkshop);
+                if (window.firebaseDB) {
+                    const { doc, setDoc } = window.firebaseModules;
+                    setDoc(doc(window.firebaseDB, 'workshops', newWorkshop.id), newWorkshop).catch(e => window.handleFirestoreError(e, 'create', 'workshops'));
+                } else {
+                    userWorkshops.push(newWorkshop);
+                    localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                    allWorkshops.push(newWorkshop);
+                }
                 
                 mechanicLoggedIn = true;
                 mechanicPhone = newWorkshop.phone;
@@ -1063,6 +1074,11 @@
             }
             localStorage.setItem('bhat_followed', JSON.stringify(followedWorkshops));
             
+            if (window.firebaseDB && currentUserId) {
+                const { doc, updateDoc } = window.firebaseModules;
+                updateDoc(doc(window.firebaseDB, 'users', currentUserId), { followedWorkshops }).catch(e => window.handleFirestoreError(e, 'update', 'users'));
+            }
+            
             updateFollowButtonState(id);
             if(document.getElementById('profile').classList.contains('active')) {
                 renderFollowed();
@@ -1176,26 +1192,47 @@
                 localStorage.setItem('bhat_user', currentUser);
                 document.getElementById('profileNameDisplay').textContent = currentUser;
                 
+                if (window.firebaseDB && currentUserId) {
+                    const { doc, updateDoc } = window.firebaseModules;
+                    updateDoc(doc(window.firebaseDB, 'users', currentUserId), { name: currentUser }).catch(e => window.handleFirestoreError(e, 'update', 'users'));
+                }
+                
                 if (mechanicLoggedIn && mechanicPhone) {
                     let updated = false;
-                    userWorkshops.forEach(w => {
+                    allWorkshops.forEach(w => {
                         if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
                             w.owner = currentUser;
                             updated = true;
+                            if (window.firebaseDB) {
+                                const { doc, updateDoc } = window.firebaseModules;
+                                updateDoc(doc(window.firebaseDB, 'workshops', w.id), { owner: currentUser }).catch(e => window.handleFirestoreError(e, 'update', 'workshops'));
+                            }
                         }
                     });
-                    if (updated) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
                     
-                    workshopsDB.forEach(w => {
-                        if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
-                            w.owner = currentUser;
-                            updated = true;
+                    if (!window.firebaseDB) {
+                        userWorkshops.forEach(w => {
+                            if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
+                                w.owner = currentUser;
+                                updated = true;
+                            }
+                        });
+                        if (updated) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                        
+                        workshopsDB.forEach(w => {
+                            if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
+                                w.owner = currentUser;
+                                updated = true;
+                            }
+                        });
+                        if (updated) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                        
+                        if (updated) {
+                            allWorkshops = [...workshopsDB, ...userWorkshops];
                         }
-                    });
-                    if (updated) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
-                    
+                    }
+
                     if (updated) {
-                        allWorkshops = [...workshopsDB, ...userWorkshops];
                         renderDashboard();
                         if(document.getElementById('explore').classList.contains('active')) {
                             renderWorkshops(allWorkshops);
@@ -1219,30 +1256,53 @@
                     img.src = profilePhoto;
                     img.classList.remove('hidden');
                     
+                    if (window.firebaseDB && currentUserId) {
+                        const { doc, updateDoc } = window.firebaseModules;
+                        updateDoc(doc(window.firebaseDB, 'users', currentUserId), { profilePhoto: profilePhoto }).catch(e => window.handleFirestoreError(e, 'update', 'users'));
+                    }
+                    
                     if (mechanicLoggedIn && mechanicPhone) {
                         let updated = false;
-                        userWorkshops.forEach(w => {
+                        allWorkshops.forEach(w => {
                             if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
                                 w.image = profilePhoto;
                                 if (!w.gallery) w.gallery = [];
                                 w.gallery.unshift(profilePhoto);
                                 updated = true;
+                                if (window.firebaseDB) {
+                                    const { doc, updateDoc } = window.firebaseModules;
+                                    updateDoc(doc(window.firebaseDB, 'workshops', w.id), { image: profilePhoto, gallery: w.gallery }).catch(e => window.handleFirestoreError(e, 'update', 'workshops'));
+                                }
                             }
                         });
-                        if (updated) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
                         
-                        workshopsDB.forEach(w => {
-                            if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
-                                w.image = profilePhoto;
-                                if (!w.gallery) w.gallery = [];
-                                w.gallery.unshift(profilePhoto);
-                                updated = true;
+                        if (!window.firebaseDB) {
+                            userWorkshops.forEach(w => {
+                                if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
+                                    w.image = profilePhoto;
+                                    if (!w.gallery) w.gallery = [];
+                                    w.gallery.unshift(profilePhoto);
+                                    updated = true;
+                                }
+                            });
+                            if (updated) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                            
+                            workshopsDB.forEach(w => {
+                                if (w.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
+                                    w.image = profilePhoto;
+                                    if (!w.gallery) w.gallery = [];
+                                    w.gallery.unshift(profilePhoto);
+                                    updated = true;
+                                }
+                            });
+                            if (updated) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                            
+                            if (updated) {
+                                allWorkshops = [...workshopsDB, ...userWorkshops];
                             }
-                        });
-                        if (updated) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
-                        
+                        }
+
                         if (updated) {
-                            allWorkshops = [...workshopsDB, ...userWorkshops];
                             renderDashboard();
                             if(document.getElementById('explore').classList.contains('active')) {
                                 renderWorkshops(allWorkshops);
@@ -1524,8 +1584,15 @@
             const serviceType = document.getElementById('bookingServiceType').value;
             const vehicle = document.getElementById('bookingVehicle').value;
 
-            bookings.push({ id: Date.now(), userId: currentUserId, userName: currentUser, name, phone, workshopId: id, date, time, serviceType, vehicle, status: 'Pending' });
-            localStorage.setItem('bhat_bookings', JSON.stringify(bookings));
+            const newBooking = { id: Date.now().toString(), userId: currentUserId, userName: name, phone, workshopId: id, date, time, serviceType, vehicle, status: 'Pending', createdAt: new Date().toISOString() };
+            
+            if (window.firebaseDB) {
+                const { doc, setDoc } = window.firebaseModules;
+                setDoc(doc(window.firebaseDB, 'bookings', newBooking.id), newBooking).catch(e => window.handleFirestoreError(e, 'create', 'bookings'));
+            } else {
+                bookings.push(newBooking);
+                localStorage.setItem('bhat_bookings', JSON.stringify(bookings));
+            }
 
             closeBookingModal();
             e.target.reset();
@@ -1568,7 +1635,7 @@
         }
 
         // Reviews Logic
-        let reviewsDB = JSON.parse(localStorage.getItem('bhat_reviews')) || {};
+        var reviewsDB = JSON.parse(localStorage.getItem('bhat_reviews')) || {};
 
         function submitReview(event, workshopId) {
             event.preventDefault();
@@ -1584,31 +1651,43 @@
             const reviewObj = {
                 id: existingIndex > -1 ? reviewsDB[workshopId][existingIndex].id : 'rev_' + Date.now(),
                 userId: currentUserId,
-                user: currentUser,
+                userName: currentUser,
                 rating: rating,
                 text: text,
-                date: new Date().toLocaleDateString()
+                date: new Date().toLocaleDateString(),
+                createdAt: new Date().toISOString(),
+                workshopId: workshopId
             };
             
-            if (existingIndex > -1) {
-                reviewsDB[workshopId][existingIndex] = reviewObj;
+            if (window.firebaseDB) {
+                const { doc, setDoc } = window.firebaseModules;
+                setDoc(doc(window.firebaseDB, 'reviews', reviewObj.id), reviewObj).catch(e => window.handleFirestoreError(e, 'create', 'reviews'));
             } else {
-                reviewsDB[workshopId].unshift(reviewObj);
+                if (existingIndex > -1) {
+                    reviewsDB[workshopId][existingIndex] = reviewObj;
+                } else {
+                    reviewsDB[workshopId].unshift(reviewObj);
+                }
+                localStorage.setItem('bhat_reviews', JSON.stringify(reviewsDB));
             }
-            
-            localStorage.setItem('bhat_reviews', JSON.stringify(reviewsDB));
             
             // Recalculate average rating
             const workshop = allWorkshops.find(w => w.id === workshopId);
             if (workshop) {
                 const total = reviewsDB[workshopId].reduce((sum, r) => sum + r.rating, 0);
-                workshop.rating = (total / reviewsDB[workshopId].length).toFixed(1);
+                workshop.rating = parseFloat((total / reviewsDB[workshopId].length).toFixed(1));
+                workshop.reviewsCount = reviewsDB[workshopId].length;
                 
-                // Update in storage
-                const wsIndex = userWorkshops.findIndex(w => w.id === workshopId);
-                if (wsIndex > -1) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
-                const dbIndex = workshopsDB.findIndex(w => w.id === workshopId);
-                if (dbIndex > -1) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                if (window.firebaseDB) {
+                    const { doc, updateDoc } = window.firebaseModules;
+                    updateDoc(doc(window.firebaseDB, 'workshops', workshopId), { rating: workshop.rating, reviewsCount: workshop.reviewsCount }).catch(e => window.handleFirestoreError(e, 'update', 'workshops'));
+                } else {
+                    // Update in storage
+                    const wsIndex = userWorkshops.findIndex(w => w.id === workshopId);
+                    if (wsIndex > -1) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                    const dbIndex = workshopsDB.findIndex(w => w.id === workshopId);
+                    if (dbIndex > -1) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                }
                 
                 allWorkshops = [...workshopsDB, ...userWorkshops];
             }
@@ -1634,23 +1713,42 @@
 
         function deleteReview(workshopId, reviewId) {
             showConfirmModal("Are you sure you want to delete your review?", () => {
-                reviewsDB[workshopId] = reviewsDB[workshopId].filter(r => r.id !== reviewId);
-                localStorage.setItem('bhat_reviews', JSON.stringify(reviewsDB));
-                
-                const workshop = allWorkshops.find(w => w.id === workshopId);
-                if (workshop) {
-                    if (reviewsDB[workshopId].length > 0) {
-                        const total = reviewsDB[workshopId].reduce((sum, r) => sum + r.rating, 0);
-                        workshop.rating = (total / reviewsDB[workshopId].length).toFixed(1);
-                    } else {
-                        workshop.rating = 5.0;
-                    }
-                    const wsIndex = userWorkshops.findIndex(w => w.id === workshopId);
-                    if (wsIndex > -1) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
-                    const dbIndex = workshopsDB.findIndex(w => w.id === workshopId);
-                    if (dbIndex > -1) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                if (window.firebaseDB) {
+                    const { doc, deleteDoc, updateDoc } = window.firebaseModules;
+                    deleteDoc(doc(window.firebaseDB, 'reviews', reviewId));
                     
-                    allWorkshops = [...workshopsDB, ...userWorkshops];
+                    const workshop = allWorkshops.find(w => w.id === workshopId);
+                    if (workshop) {
+                        const remainingReviews = (reviewsDB[workshopId] || []).filter(r => r.id !== reviewId);
+                        workshop.reviewsCount = remainingReviews.length;
+                        if (remainingReviews.length > 0) {
+                            const total = remainingReviews.reduce((sum, r) => sum + r.rating, 0);
+                            workshop.rating = parseFloat((total / remainingReviews.length).toFixed(1));
+                        } else {
+                            workshop.rating = 5.0;
+                        }
+                        updateDoc(doc(window.firebaseDB, 'workshops', workshopId), { rating: workshop.rating, reviewsCount: workshop.reviewsCount }).catch(e => window.handleFirestoreError(e, 'update', 'workshops'));
+                    }
+                } else {
+                    reviewsDB[workshopId] = reviewsDB[workshopId].filter(r => r.id !== reviewId);
+                    localStorage.setItem('bhat_reviews', JSON.stringify(reviewsDB));
+                    
+                    const workshop = allWorkshops.find(w => w.id === workshopId);
+                    if (workshop) {
+                        workshop.reviewsCount = reviewsDB[workshopId].length;
+                        if (reviewsDB[workshopId].length > 0) {
+                            const total = reviewsDB[workshopId].reduce((sum, r) => sum + r.rating, 0);
+                            workshop.rating = parseFloat((total / reviewsDB[workshopId].length).toFixed(1));
+                        } else {
+                            workshop.rating = 5.0;
+                        }
+                        const wsIndex = userWorkshops.findIndex(w => w.id === workshopId);
+                        if (wsIndex > -1) localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                        const dbIndex = workshopsDB.findIndex(w => w.id === workshopId);
+                        if (dbIndex > -1) localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                        
+                        allWorkshops = [...workshopsDB, ...userWorkshops];
+                    }
                 }
                 
                 document.getElementById('reviewForm').reset();
@@ -1676,7 +1774,7 @@
             list.innerHTML = reviews.map(r => `
                 <div class="bg-white dark:bg-[#121212] p-3 rounded-xl border border-stone-100 dark:border-stone-800 relative">
                     <div class="flex justify-between items-start mb-1">
-                        <span class="text-xs font-bold text-bhat-ink dark:text-bhat-darkInk">${r.user}</span>
+                        <span class="text-xs font-bold text-bhat-ink dark:text-bhat-darkInk">${r.userName || r.user || 'User'}</span>
                         <span class="text-[10px] text-stone-400">${r.date}</span>
                     </div>
                     <div class="text-[10px] mb-1">${'⭐'.repeat(r.rating)}</div>
@@ -1692,50 +1790,6 @@
         }
 
         // Dashboard Logic
-        function loginMechanic() {
-            const phone = document.getElementById('mechanicPhoneInput').value;
-            if (phone.trim().length > 5) {
-                mechanicLoggedIn = true;
-                mechanicPhone = phone.trim();
-                localStorage.setItem('bhat_mechanic_logged_in', 'true');
-                localStorage.setItem('bhat_mechanic_phone', mechanicPhone);
-                updateAddTabVisibility();
-                renderDashboard();
-            } else {
-                showModal("Please enter a valid phone number.");
-            }
-        }
-
-        function logoutMechanic() {
-            mechanicLoggedIn = false;
-            mechanicPhone = '';
-            localStorage.setItem('bhat_mechanic_logged_in', 'false');
-            localStorage.setItem('bhat_mechanic_phone', '');
-            
-            // Also log out from profile
-            currentUser = 'Guest User';
-            localStorage.removeItem('bhat_user');
-            document.getElementById('profileNameDisplay').textContent = currentUser;
-            
-            profilePhoto = null;
-            localStorage.removeItem('bhat_profile_photo');
-            document.getElementById('profileIcon').classList.remove('hidden');
-            document.getElementById('profileImage').classList.add('hidden');
-            document.getElementById('profileImage').src = '';
-
-            currentUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('bhat_user_id', currentUserId);
-
-            followedWorkshops = [];
-            localStorage.removeItem('bhat_followed');
-            renderFollowed();
-            renderWorkshops(allWorkshops); // Re-render to update heart icons
-
-            updateAddTabVisibility();
-            renderDashboard();
-            renderMyBookings();
-        }
-
         function renderDashboard() {
             const loginSection = document.getElementById('dashboardLogin');
             const contentSection = document.getElementById('dashboardContent');
@@ -1758,7 +1812,7 @@
                 contentSection.innerHTML = `
                     <div class="bg-white dark:bg-bhat-darkSurface border border-stone-100 dark:border-stone-800 p-8 rounded-[2rem] text-center">
                         <p class="text-stone-500 dark:text-stone-400 mb-4">No workshops found for this phone number.</p>
-                        <button onclick="logoutMechanic()" class="text-sm text-bhat-accent hover:underline">Logout</button>
+                        <button onclick="logoutFromGoogle()" class="text-sm text-bhat-accent hover:underline">Logout</button>
                     </div>
                 `;
                 return;
@@ -1770,7 +1824,7 @@
                         <h3 class="font-serif font-medium text-xl text-bhat-ink dark:text-bhat-darkInk">Welcome Back</h3>
                         <p class="text-xs text-stone-500 dark:text-stone-400">${mechanicPhone}</p>
                     </div>
-                    <button onclick="logoutMechanic()" class="text-sm bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 px-4 py-2 rounded-xl hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors">Logout</button>
+                    <button onclick="logoutFromGoogle()" class="text-sm bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 px-4 py-2 rounded-xl hover:bg-stone-200 dark:hover:bg-stone-700 transition-colors">Logout</button>
                 </div>
             `;
 
@@ -1779,6 +1833,10 @@
                 if (!savesCount) {
                     savesCount = Math.floor(Math.random() * 50) + 10;
                     localStorage.setItem('saves_' + w.id, savesCount);
+                    if (window.firebaseDB) {
+                        const { doc, updateDoc } = window.firebaseModules;
+                        updateDoc(doc(window.firebaseDB, 'workshops', w.id), { savesCount: parseInt(savesCount) }).catch(e => window.handleFirestoreError(e, 'update', 'workshops'));
+                    }
                 }
                 const isOpen = localStorage.getItem('status_' + w.id) !== 'closed';
                 const wBookings = bookings.filter(b => b.workshopId === w.id);
@@ -1805,7 +1863,7 @@
                 let reviewsHtml = wReviews.length > 0 ? wReviews.map(r => `
                     <div class="bg-stone-50 dark:bg-stone-800/50 p-3 rounded-xl border border-stone-100 dark:border-stone-700">
                         <div class="flex justify-between items-start mb-1">
-                            <span class="text-xs font-bold text-bhat-ink dark:text-bhat-darkInk">${r.user}</span>
+                            <span class="text-xs font-bold text-bhat-ink dark:text-bhat-darkInk">${r.userName || r.user || 'User'}</span>
                             <span class="text-[10px] text-stone-400">${r.date}</span>
                         </div>
                         <div class="text-[10px] mb-1">${'⭐'.repeat(r.rating)}</div>
@@ -1880,10 +1938,15 @@
         function updateBookingStatus(bookingId, newStatus) {
             const bIndex = bookings.findIndex(b => b.id.toString() === bookingId.toString());
             if (bIndex > -1) {
-                bookings[bIndex].status = newStatus;
-                localStorage.setItem('bhat_bookings', JSON.stringify(bookings));
-                renderDashboard();
-                renderMyBookings();
+                if (window.firebaseDB) {
+                    const { doc, updateDoc } = window.firebaseModules;
+                    updateDoc(doc(window.firebaseDB, 'bookings', bookingId.toString()), { status: newStatus }).catch(e => window.handleFirestoreError(e, 'update', 'bookings'));
+                } else {
+                    bookings[bIndex].status = newStatus;
+                    localStorage.setItem('bhat_bookings', JSON.stringify(bookings));
+                    renderDashboard();
+                    renderMyBookings();
+                }
             }
         }
 
@@ -1946,6 +2009,7 @@
             const name = document.getElementById('editWName').value;
             const owner = document.getElementById('editWOwner').value;
             const location = document.getElementById('editWLocation').value;
+            const address = document.getElementById('editWLocation').value;
             const services = document.getElementById('editWServices').value.split(',').map(s => s.trim());
             const links = {
                 call: document.getElementById('editWLinkCall').value,
@@ -1955,31 +2019,39 @@
                 website: document.getElementById('editWLinkWebsite').value
             };
             
-            const wsIndex = userWorkshops.findIndex(w => w.id === id);
-            if (wsIndex > -1) {
-                userWorkshops[wsIndex].name = name;
-                userWorkshops[wsIndex].owner = owner;
-                userWorkshops[wsIndex].location = location;
-                userWorkshops[wsIndex].services = services;
-                userWorkshops[wsIndex].links = links;
-                localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
-            } else if (mechanicPhone === '9906584655') {
-                const dbIndex = workshopsDB.findIndex(w => w.id === id);
-                if (dbIndex > -1) {
-                    workshopsDB[dbIndex].name = name;
-                    workshopsDB[dbIndex].owner = owner;
-                    workshopsDB[dbIndex].location = location;
-                    workshopsDB[dbIndex].services = services;
-                    workshopsDB[dbIndex].links = links;
-                    localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+            if (window.firebaseDB) {
+                const { doc, updateDoc } = window.firebaseModules;
+                updateDoc(doc(window.firebaseDB, 'workshops', id), {
+                    name, owner, location, address, services, links
+                }).catch(e => window.handleFirestoreError(e, 'update', 'workshops'));
+            } else {
+                const wsIndex = userWorkshops.findIndex(w => w.id === id);
+                if (wsIndex > -1) {
+                    userWorkshops[wsIndex].name = name;
+                    userWorkshops[wsIndex].owner = owner;
+                    userWorkshops[wsIndex].location = location;
+                    userWorkshops[wsIndex].address = address;
+                    userWorkshops[wsIndex].services = services;
+                    userWorkshops[wsIndex].links = links;
+                    localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                } else if (mechanicPhone === '9906584655') {
+                    const dbIndex = workshopsDB.findIndex(w => w.id === id);
+                    if (dbIndex > -1) {
+                        workshopsDB[dbIndex].name = name;
+                        workshopsDB[dbIndex].owner = owner;
+                        workshopsDB[dbIndex].location = location;
+                        workshopsDB[dbIndex].address = address;
+                        workshopsDB[dbIndex].services = services;
+                        workshopsDB[dbIndex].links = links;
+                        localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                    }
                 }
+                allWorkshops = [...workshopsDB, ...userWorkshops];
             }
-            
-            allWorkshops = [...workshopsDB, ...userWorkshops];
             
             const workshop = allWorkshops.find(w => w.id === id);
             if (workshop && workshop.phone.replace(/\s/g, '') === mechanicPhone.replace(/\s/g, '')) {
-                currentUser = workshop.owner;
+                currentUser = owner;
                 localStorage.setItem('bhat_user', currentUser);
                 document.getElementById('profileNameDisplay').textContent = currentUser;
             }
@@ -1993,34 +2065,42 @@
 
         function toggleWorkshopStatus(id) {
             const current = localStorage.getItem('status_' + id);
-            if (current === 'closed') {
-                localStorage.setItem('status_' + id, 'open');
-            } else {
-                localStorage.setItem('status_' + id, 'closed');
+            const newStatus = current === 'closed' ? 'open' : 'closed';
+            localStorage.setItem('status_' + id, newStatus);
+            
+            if (window.firebaseDB) {
+                const { doc, updateDoc } = window.firebaseModules;
+                updateDoc(doc(window.firebaseDB, 'workshops', id), { isOpen: newStatus === 'open' }).catch(e => window.handleFirestoreError(e, 'update', 'workshops'));
             }
+            
             renderDashboard();
         }
 
         function deleteWorkshop(id) {
             showConfirmModal("Are you sure you want to delete this workshop? This action cannot be undone.", () => {
-                // Remove from userWorkshops if exists
-                const wsIndex = userWorkshops.findIndex(w => w.id === id);
-                if (wsIndex > -1) {
-                    userWorkshops.splice(wsIndex, 1);
-                    localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
-                } else if (mechanicPhone === '9906584655') {
-                    // Admin deleting a DB workshop
-                    const dbIndex = workshopsDB.findIndex(w => w.id === id);
-                    if (dbIndex > -1) {
-                        workshopsDB.splice(dbIndex, 1);
-                        localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                if (window.firebaseDB) {
+                    const { doc, deleteDoc } = window.firebaseModules;
+                    deleteDoc(doc(window.firebaseDB, 'workshops', id)).catch(e => window.handleFirestoreError(e, 'delete', 'workshops'));
+                } else {
+                    // Remove from userWorkshops if exists
+                    const wsIndex = userWorkshops.findIndex(w => w.id === id);
+                    if (wsIndex > -1) {
+                        userWorkshops.splice(wsIndex, 1);
+                        localStorage.setItem('bhat_user_workshops', JSON.stringify(userWorkshops));
+                    } else if (mechanicPhone === '9906584655') {
+                        // Admin deleting a DB workshop
+                        const dbIndex = workshopsDB.findIndex(w => w.id === id);
+                        if (dbIndex > -1) {
+                            workshopsDB.splice(dbIndex, 1);
+                            localStorage.setItem('bhat_workshops_db', JSON.stringify(workshopsDB));
+                        }
                     }
-                }
 
-                // Remove from allWorkshops
-                const allWsIndex = allWorkshops.findIndex(w => w.id === id);
-                if (allWsIndex > -1) {
-                    allWorkshops.splice(allWsIndex, 1);
+                    // Remove from allWorkshops
+                    const allWsIndex = allWorkshops.findIndex(w => w.id === id);
+                    if (allWsIndex > -1) {
+                        allWorkshops.splice(allWsIndex, 1);
+                    }
                 }
 
                 // Clean up status

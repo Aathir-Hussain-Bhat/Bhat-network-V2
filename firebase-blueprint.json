@@ -1,0 +1,103 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the application, can be a customer or a mechanic.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "User's display name" },
+        "email": { "type": "string", "format": "email", "description": "User's email address" },
+        "phone": { "type": "string", "description": "User's phone number" },
+        "profilePhoto": { "type": "string", "description": "URL to profile photo" },
+        "role": { "type": "string", "enum": ["user", "mechanic", "admin"], "description": "User's role" },
+        "followedWorkshops": { "type": "array", "items": { "type": "string" }, "description": "List of followed workshop IDs" }
+      },
+      "required": ["name", "email", "role"]
+    },
+    "Workshop": {
+      "title": "Workshop",
+      "description": "A mechanic workshop listed on the platform.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Workshop ID" },
+        "name": { "type": "string", "description": "Workshop name" },
+        "owner": { "type": "string", "description": "Name of the owner" },
+        "ownerId": { "type": "string", "description": "UID of the user who owns this workshop" },
+        "phone": { "type": "string", "description": "Contact phone number" },
+        "address": { "type": "string", "description": "Physical address" },
+        "location": { "type": "string", "description": "Location string" },
+        "services": { "type": "array", "items": { "type": "string" }, "description": "List of services offered" },
+        "rating": { "type": "number", "description": "Average rating" },
+        "reviewsCount": { "type": "number", "description": "Total number of reviews" },
+        "image": { "type": "string", "description": "URL to workshop image" },
+        "gallery": { "type": "array", "items": { "type": "string" }, "description": "Array of image URLs" },
+        "isOpen": { "type": "boolean", "description": "Whether the workshop is currently open" },
+        "savesCount": { "type": "number", "description": "Number of times users saved this workshop" },
+        "links": {
+          "type": "object",
+          "properties": {
+            "call": { "type": "string" },
+            "directions": { "type": "string" },
+            "youtube": { "type": "string" },
+            "instagram": { "type": "string" },
+            "website": { "type": "string" }
+          }
+        }
+      },
+      "required": ["id", "name", "owner", "ownerId", "phone", "address", "location", "services", "rating", "reviewsCount", "image", "isOpen", "savesCount"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "An appointment booking made by a user for a workshop.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Booking ID" },
+        "userId": { "type": "string", "description": "UID of the user making the booking" },
+        "workshopId": { "type": "string", "description": "ID of the workshop" },
+        "userName": { "type": "string", "description": "Name of the user" },
+        "phone": { "type": "string", "description": "Contact phone for the booking" },
+        "date": { "type": "string", "description": "Date of the appointment" },
+        "time": { "type": "string", "description": "Time of the appointment" },
+        "serviceType": { "type": "string", "description": "Type of service requested" },
+        "vehicle": { "type": "string", "description": "Vehicle details" },
+        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Completed", "Cancelled"], "description": "Status of the booking" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the booking was created" }
+      },
+      "required": ["id", "userId", "workshopId", "userName", "phone", "date", "time", "serviceType", "vehicle", "status", "createdAt"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A review left by a user for a workshop.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Review ID" },
+        "workshopId": { "type": "string", "description": "ID of the workshop being reviewed" },
+        "userId": { "type": "string", "description": "UID of the user leaving the review" },
+        "userName": { "type": "string", "description": "Name of the user" },
+        "rating": { "type": "number", "description": "Rating out of 5" },
+        "text": { "type": "string", "description": "Review text" },
+        "date": { "type": "string", "description": "Display date of the review" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the review was created" }
+      },
+      "required": ["id", "workshopId", "userId", "userName", "rating", "text", "date", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles."
+    },
+    "workshops/{workshopId}": {
+      "schema": { "$ref": "#/entities/Workshop" },
+      "description": "Stores workshop details."
+    },
+    "bookings/{bookingId}": {
+      "schema": { "$ref": "#/entities/Booking" },
+      "description": "Stores appointment bookings."
+    },
+    "reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Stores workshop reviews."
+    }
+  }
+}

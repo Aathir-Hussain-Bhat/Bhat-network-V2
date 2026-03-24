@@ -1,0 +1,283 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - name: string (required)
+    //   - email: string (required)
+    //   - phone: string (optional)
+    //   - profilePhoto: string (optional)
+    //   - role: string (required, 'user' | 'mechanic' | 'admin')
+    //   - followedWorkshops: list of strings (optional)
+    //
+    // Collection: workshops
+    // Document ID: {workshopId}
+    // Fields:
+    //   - id: string (required)
+    //   - name: string (required)
+    //   - owner: string (required)
+    //   - ownerId: string (required)
+    //   - phone: string (required)
+    //   - address: string (required)
+    //   - location: string (required)
+    //   - services: list of strings (required)
+    //   - rating: number (required)
+    //   - reviewsCount: number (required)
+    //   - image: string (required)
+    //   - gallery: list of strings (optional)
+    //   - isOpen: boolean (required)
+    //   - savesCount: number (required)
+    //   - links: map (optional)
+    //
+    // Collection: bookings
+    // Document ID: {bookingId}
+    // Fields:
+    //   - id: string (required)
+    //   - userId: string (required)
+    //   - workshopId: string (required)
+    //   - userName: string (required)
+    //   - phone: string (required)
+    //   - date: string (required)
+    //   - time: string (required)
+    //   - serviceType: string (required)
+    //   - vehicle: string (required)
+    //   - status: string (required, 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled')
+    //   - createdAt: string (required)
+    //
+    // Collection: reviews
+    // Document ID: {reviewId}
+    // Fields:
+    //   - id: string (required)
+    //   - workshopId: string (required)
+    //   - userId: string (required)
+    //   - userName: string (required)
+    //   - rating: number (required)
+    //   - text: string (required)
+    //   - date: string (required)
+    //   - createdAt: string (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    function isWorkshopOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.ownerId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+        (request.auth.token.email == "aathirhussain019@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen;
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidOptionalString(field, minLen, maxLen) {
+      return !(field in request.resource.data) ||
+             (request.resource.data[field] is string &&
+              request.resource.data[field].size() >= minLen &&
+              request.resource.data[field].size() <= maxLen);
+    }
+
+    function isValidList(listField, maxSize) {
+      return !(listField in request.resource.data) ||
+             (request.resource.data[listField] is list && request.resource.data[listField].size() <= maxSize);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(['name', 'email', 'role']) &&
+             hasOnlyAllowedFields(['name', 'email', 'phone', 'profilePhoto', 'role', 'followedWorkshops']) &&
+             validStringLength('name', 1, 100) &&
+             isValidEmail(data.email) &&
+             isValidOptionalString('phone', 5, 20) &&
+             isValidOptionalString('profilePhoto', 0, 1048576) &&
+             data.role in ['user', 'mechanic', 'admin'] &&
+             isValidList('followedWorkshops', 100);
+    }
+
+    function isValidWorkshop(data) {
+      return hasRequiredFields(['id', 'name', 'owner', 'ownerId', 'phone', 'address', 'location', 'services', 'rating', 'reviewsCount', 'image', 'isOpen', 'savesCount']) &&
+             hasOnlyAllowedFields(['id', 'name', 'owner', 'ownerId', 'phone', 'address', 'location', 'services', 'rating', 'reviewsCount', 'image', 'gallery', 'isOpen', 'savesCount', 'links']) &&
+             validStringLength('id', 1, 100) &&
+             validStringLength('name', 1, 100) &&
+             validStringLength('owner', 1, 100) &&
+             data.ownerId == request.auth.uid &&
+             validStringLength('phone', 5, 20) &&
+             validStringLength('address', 1, 200) &&
+             validStringLength('location', 1, 200) &&
+             isValidList('services', 20) &&
+             data.rating is number && data.rating >= 0 && data.rating <= 5 &&
+             data.reviewsCount is number && data.reviewsCount >= 0 &&
+             validStringLength('image', 0, 1048576) &&
+             isValidList('gallery', 20) &&
+             data.isOpen is bool &&
+             data.savesCount is number && data.savesCount >= 0 &&
+             (!( 'links' in data ) || data.links is map);
+    }
+
+    function isValidWorkshopUpdate(data) {
+      return hasRequiredFields(['id', 'name', 'owner', 'ownerId', 'phone', 'address', 'location', 'services', 'rating', 'reviewsCount', 'image', 'isOpen', 'savesCount']) &&
+             hasOnlyAllowedFields(['id', 'name', 'owner', 'ownerId', 'phone', 'address', 'location', 'services', 'rating', 'reviewsCount', 'image', 'gallery', 'isOpen', 'savesCount', 'links']) &&
+             data.id == resource.data.id && // id cannot change
+             validStringLength('name', 1, 100) &&
+             validStringLength('owner', 1, 100) &&
+             data.ownerId == resource.data.ownerId && // ownerId cannot change
+             validStringLength('phone', 5, 20) &&
+             validStringLength('address', 1, 200) &&
+             validStringLength('location', 1, 200) &&
+             isValidList('services', 20) &&
+             data.rating is number && data.rating >= 0 && data.rating <= 5 &&
+             data.reviewsCount is number && data.reviewsCount >= 0 &&
+             validStringLength('image', 0, 1048576) &&
+             isValidList('gallery', 20) &&
+             data.isOpen is bool &&
+             data.savesCount is number && data.savesCount >= 0 &&
+             (!( 'links' in data ) || data.links is map);
+    }
+
+    function isValidBooking(data) {
+      return hasRequiredFields(['id', 'userId', 'workshopId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'userId', 'workshopId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
+             validStringLength('id', 1, 100) &&
+             data.userId == request.auth.uid &&
+             validStringLength('workshopId', 1, 100) &&
+             validStringLength('userName', 1, 100) &&
+             validStringLength('phone', 5, 20) &&
+             validStringLength('date', 1, 20) &&
+             validStringLength('time', 1, 20) &&
+             validStringLength('serviceType', 1, 100) &&
+             validStringLength('vehicle', 1, 100) &&
+             data.status in ['Pending', 'Confirmed', 'Completed', 'Cancelled'] &&
+             validStringLength('createdAt', 1, 50);
+    }
+
+    function isValidBookingUpdate(data) {
+      return hasRequiredFields(['id', 'userId', 'workshopId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'userId', 'workshopId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
+             data.id == resource.data.id && // id cannot change
+             data.userId == resource.data.userId && // userId cannot change
+             data.workshopId == resource.data.workshopId && // workshopId cannot change
+             validStringLength('userName', 1, 100) &&
+             validStringLength('phone', 5, 20) &&
+             validStringLength('date', 1, 20) &&
+             validStringLength('time', 1, 20) &&
+             validStringLength('serviceType', 1, 100) &&
+             validStringLength('vehicle', 1, 100) &&
+             data.status in ['Pending', 'Confirmed', 'Completed', 'Cancelled'] &&
+             data.createdAt == resource.data.createdAt; // createdAt cannot change
+    }
+
+    function isValidReview(data) {
+      return hasRequiredFields(['id', 'workshopId', 'userId', 'userName', 'rating', 'text', 'date', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'workshopId', 'userId', 'userName', 'rating', 'text', 'date', 'createdAt']) &&
+             validStringLength('id', 1, 100) &&
+             validStringLength('workshopId', 1, 100) &&
+             data.userId == request.auth.uid &&
+             validStringLength('userName', 1, 100) &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+             validStringLength('text', 1, 1000) &&
+             validStringLength('date', 1, 50) &&
+             validStringLength('createdAt', 1, 50);
+    }
+
+    function isValidReviewUpdate(data) {
+      return hasRequiredFields(['id', 'workshopId', 'userId', 'userName', 'rating', 'text', 'date', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'workshopId', 'userId', 'userName', 'rating', 'text', 'date', 'createdAt']) &&
+             data.id == resource.data.id && // id cannot change
+             data.workshopId == resource.data.workshopId && // workshopId cannot change
+             data.userId == resource.data.userId && // userId cannot change
+             validStringLength('userName', 1, 100) &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+             validStringLength('text', 1, 1000) &&
+             validStringLength('date', 1, 50) &&
+             data.createdAt == resource.data.createdAt; // createdAt cannot change
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == 'user' || isAdmin());
+      allow update: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == resource.data.role || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /workshops/{workshopId} {
+      allow read: if true; // Publicly readable
+      allow create: if isAuthenticated() && isValidWorkshop(request.resource.data);
+      allow update: if isAuthenticated() && isValidWorkshopUpdate(request.resource.data) && (isWorkshopOwner() || isAdmin() || (
+        // Allow users to update savesCount and rating/reviewsCount only
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['savesCount', 'rating', 'reviewsCount'])
+      ));
+      allow delete: if isWorkshopOwner() || isAdmin();
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if isDocOwner() || isAdmin() || (
+        // Workshop owner can read bookings for their workshop
+        isAuthenticated() && exists(/databases/$(database)/documents/workshops/$(resource.data.workshopId)) &&
+        get(/databases/$(database)/documents/workshops/$(resource.data.workshopId)).data.ownerId == request.auth.uid
+      );
+      allow create: if isAuthenticated() && isValidBooking(request.resource.data);
+      allow update: if isAuthenticated() && isValidBookingUpdate(request.resource.data) && (
+        isDocOwner() || isAdmin() || (
+          // Workshop owner can update status
+          exists(/databases/$(database)/documents/workshops/$(resource.data.workshopId)) &&
+          get(/databases/$(database)/documents/workshops/$(resource.data.workshopId)).data.ownerId == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        )
+      );
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true; // Publicly readable
+      allow create: if isAuthenticated() && isValidReview(request.resource.data);
+      allow update: if isAuthenticated() && isDocOwner() && isValidReviewUpdate(request.resource.data);
+      allow delete: if isDocOwner() || isAdmin();
+    }
+  }
+}
