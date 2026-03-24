@@ -377,6 +377,17 @@
                         <textarea id="wServices" required rows="3" class="w-full bg-stone-50 border border-stone-200 rounded-2xl p-3.5 text-bhat-ink text-sm focus:border-bhat-ink focus:ring-1 focus:ring-bhat-ink outline-none transition-all resize-none"></textarea>
                     </div>
 
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-semibold text-stone-500 uppercase tracking-wider pl-1">Website Link (Optional)</label>
+                            <input type="url" id="wWebsite" class="w-full bg-stone-50 border border-stone-200 rounded-2xl p-3.5 text-bhat-ink text-sm focus:border-bhat-ink focus:ring-1 focus:ring-bhat-ink outline-none transition-all" placeholder="e.g. https://...">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[11px] font-semibold text-stone-500 uppercase tracking-wider pl-1">Workshop Photos (Select Multiple)</label>
+                            <input type="file" id="wImages" accept="image/*" multiple class="w-full bg-stone-50 border border-stone-200 rounded-2xl p-3 text-bhat-ink text-sm focus:border-bhat-ink focus:ring-1 focus:ring-bhat-ink outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-stone-200 file:text-stone-700 hover:file:bg-stone-300">
+                        </div>
+                    </div>
+
                     <button type="submit" class="w-full ripple btn-dark bg-bhat-ink text-white font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 transition-all shadow-md mt-4">
                         Submit Registration
                     </button>
@@ -414,6 +425,16 @@
                 <div id="followedList" class="space-y-3" data-aos="fade-up">
                     <div class="text-center text-stone-400 py-10 text-sm bg-white border border-stone-100 border-dashed rounded-3xl" id="emptyFollowed">
                         You haven't saved any workshops to your garage yet.
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-serif font-medium mb-6 mt-10 flex items-center gap-2 text-bhat-ink" data-aos="fade-right">
+                    <i class="fas fa-calendar-check text-stone-300 text-sm"></i> My Bookings
+                </h3>
+                
+                <div id="myBookingsList" class="space-y-3" data-aos="fade-up">
+                    <div class="text-center text-stone-400 py-10 text-sm bg-white border border-stone-100 border-dashed rounded-3xl" id="emptyBookings">
+                        You haven't booked any appointments yet.
                     </div>
                 </div>
             </div>
@@ -646,6 +667,11 @@
                     </div>
                 </div>
 
+                <div class="space-y-2">
+                    <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Website Link (Optional)</label>
+                    <input type="url" id="editWLinkWebsite" class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all" placeholder="e.g. https://yourwebsite.com">
+                </div>
+
                 <button type="submit" class="w-full ripple btn-dark bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-all shadow-md mt-4">
                     Save Changes
                 </button>
@@ -664,6 +690,14 @@
             
             <form id="bookingForm" class="space-y-4">
                 <input type="hidden" id="bookingWorkshopId">
+                <div class="space-y-1">
+                    <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Your Name</label>
+                    <input type="text" id="bookingUserName" required class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all" placeholder="e.g. John Doe">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Your Phone</label>
+                    <input type="tel" id="bookingUserPhone" required class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all" placeholder="e.g. 9876543210">
+                </div>
                 <div class="space-y-1">
                     <label class="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider pl-1">Date</label>
                     <input type="date" id="bookingDate" required class="w-full bg-stone-50 dark:bg-[#121212] border border-stone-200 dark:border-stone-700 rounded-2xl p-3.5 text-bhat-ink dark:text-bhat-darkInk text-sm focus:border-bhat-ink dark:focus:border-bhat-darkAccent outline-none transition-all">
@@ -864,7 +898,7 @@
                 renderWorkshops(filtered);
             });
 
-            document.getElementById('addWorkshopForm').addEventListener('submit', (e) => {
+            document.getElementById('addWorkshopForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const phoneVal = document.getElementById('wPhone').value.trim();
                 
@@ -872,6 +906,23 @@
                 if (existing) {
                     showModal("A workshop with this phone number is already registered. Please use the dashboard to manage it.");
                     return;
+                }
+
+                const imageInput = document.getElementById('wImages');
+                let mainImage = 'https://images.unsplash.com/photo-1613214149922-f1809c99b414?q=80&w=500&auto=format&fit=crop';
+                let gallery = [];
+
+                if (imageInput.files && imageInput.files.length > 0) {
+                    const readFiles = Array.from(imageInput.files).map(file => {
+                        return new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = (e) => resolve(e.target.result);
+                            reader.readAsDataURL(file);
+                        });
+                    });
+                    const results = await Promise.all(readFiles);
+                    mainImage = results[0];
+                    gallery = results;
                 }
 
                 const newWorkshop = {
@@ -882,7 +933,11 @@
                     location: document.getElementById('wLocation').value,
                     services: document.getElementById('wServices').value.split(',').map(s => s.trim()),
                     rating: 5.0,
-                    image: 'https://images.unsplash.com/photo-1613214149922-f1809c99b414?q=80&w=500&auto=format&fit=crop'
+                    image: mainImage,
+                    gallery: gallery,
+                    links: {
+                        website: document.getElementById('wWebsite').value || ''
+                    }
                 };
 
                 userWorkshops.push(newWorkshop);
@@ -931,7 +986,10 @@
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
             
-            if(pageId === 'profile') renderFollowed();
+            if(pageId === 'profile') {
+                renderFollowed();
+                renderMyBookings();
+            }
             if(pageId === 'explore') renderWorkshops(allWorkshops);
             if(pageId === 'dashboard') renderDashboard();
         }
@@ -1342,6 +1400,12 @@
                                     <div class="w-8 h-8 rounded-full bg-stone-50 dark:bg-stone-800 flex items-center justify-center text-green-500 dark:text-green-400"><i class="fab fa-whatsapp"></i></div>
                                     <a href="https://wa.me/91${workshop.phone}?text=Hi,%20I%20found%20your%20workshop%20on%20Bhat%20Network.%20I%20need%20help%20with%20my%20bike..." target="_blank" class="hover:underline text-green-600 dark:text-green-400">Chat on WhatsApp</a>
                                 </div>
+                                ${workshop.links && workshop.links.website ? `
+                                <div class="flex items-center gap-3 text-sm text-bhat-ink dark:text-bhat-darkInk">
+                                    <div class="w-8 h-8 rounded-full bg-stone-50 dark:bg-stone-800 flex items-center justify-center text-blue-500 dark:text-blue-400"><i class="fas fa-globe"></i></div>
+                                    <a href="${workshop.links.website}" target="_blank" class="hover:underline text-blue-600 dark:text-blue-400">Visit Website</a>
+                                </div>
+                                ` : ''}
                             </div>
 
                             <h4 class="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-4">Opening Hours</h4>
@@ -1412,6 +1476,9 @@
             document.getElementById('bookingWorkshopId').value = id;
             document.getElementById('bookingWorkshopName').textContent = `Booking at ${workshop.name}`;
             
+            document.getElementById('bookingUserName').value = currentUser !== 'Guest User' ? currentUser : '';
+            document.getElementById('bookingUserPhone').value = mechanicPhone || '';
+            
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('bookingDate').setAttribute('min', today);
 
@@ -1450,18 +1517,55 @@
         document.getElementById('bookingForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const id = document.getElementById('bookingWorkshopId').value;
+            const name = document.getElementById('bookingUserName').value;
+            const phone = document.getElementById('bookingUserPhone').value;
             const date = document.getElementById('bookingDate').value;
             const time = document.getElementById('bookingTime').value;
             const serviceType = document.getElementById('bookingServiceType').value;
             const vehicle = document.getElementById('bookingVehicle').value;
 
-            bookings.push({ id: Date.now(), workshopId: id, date, time, serviceType, vehicle, status: 'Pending' });
+            bookings.push({ id: Date.now(), userId: currentUserId, userName: currentUser, name, phone, workshopId: id, date, time, serviceType, vehicle, status: 'Pending' });
             localStorage.setItem('bhat_bookings', JSON.stringify(bookings));
 
             closeBookingModal();
             e.target.reset();
             showModal('Your appointment has been booked successfully! The workshop will contact you soon.');
         });
+
+        function renderMyBookings() {
+            const list = document.getElementById('myBookingsList');
+            const emptyMsg = document.getElementById('emptyBookings');
+            if(!list) return;
+            
+            Array.from(list.children).forEach(child => {
+                if(child.id !== 'emptyBookings') child.remove();
+            });
+
+            const userBookings = bookings.filter(b => b.userId === currentUserId);
+            if (userBookings.length === 0) {
+                emptyMsg.style.display = 'block';
+                return;
+            }
+            emptyMsg.style.display = 'none';
+
+            userBookings.forEach(b => {
+                const workshop = allWorkshops.find(w => w.id === b.workshopId);
+                const wsName = workshop ? workshop.name : 'Unknown Workshop';
+                const item = document.createElement('div');
+                item.className = 'bg-white border border-stone-100 shadow-sm p-4 rounded-2xl flex flex-col gap-2';
+                item.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-serif font-medium text-bhat-ink">${wsName}</h4>
+                            <p class="text-xs text-stone-500 font-medium">${b.serviceType} - ${b.vehicle || 'No vehicle info'}</p>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${b.status === 'Confirmed' ? 'bg-blue-100 text-blue-700' : b.status === 'Completed' ? 'bg-green-100 text-green-700' : b.status === 'Cancelled' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}">${b.status}</span>
+                    </div>
+                    <div class="text-[10px] text-stone-400 font-semibold"><i class="far fa-calendar-alt mr-1"></i> ${b.date} at ${b.time}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
 
         // Reviews Logic
         let reviewsDB = JSON.parse(localStorage.getItem('bhat_reviews')) || {};
@@ -1607,8 +1711,29 @@
             mechanicPhone = '';
             localStorage.setItem('bhat_mechanic_logged_in', 'false');
             localStorage.setItem('bhat_mechanic_phone', '');
+            
+            // Also log out from profile
+            currentUser = 'Guest User';
+            localStorage.removeItem('bhat_user');
+            document.getElementById('profileNameDisplay').textContent = currentUser;
+            
+            profilePhoto = null;
+            localStorage.removeItem('bhat_profile_photo');
+            document.getElementById('profileIcon').classList.remove('hidden');
+            document.getElementById('profileImage').classList.add('hidden');
+            document.getElementById('profileImage').src = '';
+
+            currentUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('bhat_user_id', currentUserId);
+
+            followedWorkshops = [];
+            localStorage.removeItem('bhat_followed');
+            renderFollowed();
+            renderWorkshops(allWorkshops); // Re-render to update heart icons
+
             updateAddTabVisibility();
             renderDashboard();
+            renderMyBookings();
         }
 
         function renderDashboard() {
@@ -1663,7 +1788,7 @@
                     <div class="bg-stone-50 dark:bg-stone-800/50 p-4 rounded-xl border border-stone-100 dark:border-stone-700 flex flex-col gap-3">
                         <div class="flex justify-between items-start">
                             <div>
-                                <div class="text-sm font-bold text-bhat-ink dark:text-bhat-darkInk">${b.name} <a href="tel:${b.phone}" class="text-blue-500 ml-1"><i class="fas fa-phone"></i> ${b.phone}</a></div>
+                                <div class="text-sm font-bold text-bhat-ink dark:text-bhat-darkInk">${b.name || b.userName || 'Guest'} ${b.phone ? `<a href="tel:${b.phone}" class="text-blue-500 ml-1"><i class="fas fa-phone"></i> ${b.phone}</a>` : ''}</div>
                                 <div class="text-xs font-semibold text-stone-600 dark:text-stone-300 mt-1">${b.serviceType || 'General Service'} - ${b.vehicle || 'No vehicle info'}</div>
                                 <div class="text-[10px] text-stone-500 dark:text-stone-400">${b.date} at ${b.time}</div>
                             </div>
@@ -1753,11 +1878,12 @@
         }
 
         function updateBookingStatus(bookingId, newStatus) {
-            const bIndex = bookings.findIndex(b => b.id === bookingId);
+            const bIndex = bookings.findIndex(b => b.id.toString() === bookingId.toString());
             if (bIndex > -1) {
                 bookings[bIndex].status = newStatus;
                 localStorage.setItem('bhat_bookings', JSON.stringify(bookings));
                 renderDashboard();
+                renderMyBookings();
             }
         }
 
@@ -1786,11 +1912,13 @@
                 document.getElementById('editWLinkDirections').value = workshop.links.directions || '';
                 document.getElementById('editWLinkYoutube').value = workshop.links.youtube || '';
                 document.getElementById('editWLinkInstagram').value = workshop.links.instagram || '';
+                document.getElementById('editWLinkWebsite').value = workshop.links.website || '';
             } else {
                 document.getElementById('editWLinkCall').value = '';
                 document.getElementById('editWLinkDirections').value = '';
                 document.getElementById('editWLinkYoutube').value = '';
                 document.getElementById('editWLinkInstagram').value = '';
+                document.getElementById('editWLinkWebsite').value = '';
             }
 
             const modal = document.getElementById('editWorkshopModal');
@@ -1823,7 +1951,8 @@
                 call: document.getElementById('editWLinkCall').value,
                 directions: document.getElementById('editWLinkDirections').value,
                 youtube: document.getElementById('editWLinkYoutube').value,
-                instagram: document.getElementById('editWLinkInstagram').value
+                instagram: document.getElementById('editWLinkInstagram').value,
+                website: document.getElementById('editWLinkWebsite').value
             };
             
             const wsIndex = userWorkshops.findIndex(w => w.id === id);
