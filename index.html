@@ -901,6 +901,12 @@
 
             document.getElementById('addWorkshopForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
+
+                if (window.firebaseModules && (!window.firebaseModules.auth || !window.firebaseModules.auth.currentUser)) {
+                    showModal("Please log in to register a workshop.");
+                    return;
+                }
+
                 const phoneVal = document.getElementById('wPhone').value.trim();
                 
                 const existing = allWorkshops.find(w => w.phone.replace(/\s/g, '') === phoneVal.replace(/\s/g, ''));
@@ -914,6 +920,16 @@
                 let gallery = [];
 
                 if (imageInput.files && imageInput.files.length > 0) {
+                    // Check file sizes to prevent exceeding Firestore 1MB document limit
+                    let totalSize = 0;
+                    for (let i = 0; i < imageInput.files.length; i++) {
+                        totalSize += imageInput.files[i].size;
+                    }
+                    if (totalSize > 700000) { // ~700KB limit to be safe with base64 encoding overhead
+                        showModal("Total image size is too large. Please select smaller images (max ~700KB total).");
+                        return;
+                    }
+
                     const readFiles = Array.from(imageInput.files).map(file => {
                         return new Promise((resolve) => {
                             const reader = new FileReader();
@@ -930,7 +946,7 @@
                     id: 'user-ws-' + Date.now(),
                     name: document.getElementById('wName').value,
                     owner: document.getElementById('wOwner').value,
-                    ownerId: currentUserId || 'guest',
+                    ownerId: window.firebaseModules && window.firebaseModules.auth.currentUser ? window.firebaseModules.auth.currentUser.uid : (currentUserId || 'guest'),
                     phone: document.getElementById('wPhone').value,
                     location: document.getElementById('wLocation').value,
                     address: document.getElementById('wLocation').value,
@@ -1074,7 +1090,7 @@
             }
             localStorage.setItem('bhat_followed', JSON.stringify(followedWorkshops));
             
-            if (window.firebaseDB && currentUserId) {
+            if (window.firebaseDB && currentUserId && window.firebaseModules.auth && window.firebaseModules.auth.currentUser) {
                 const { doc, updateDoc } = window.firebaseModules;
                 updateDoc(doc(window.firebaseDB, 'users', currentUserId), { followedWorkshops }).catch(e => window.handleFirestoreError(e, 'update', 'users'));
             }
@@ -1192,7 +1208,7 @@
                 localStorage.setItem('bhat_user', currentUser);
                 document.getElementById('profileNameDisplay').textContent = currentUser;
                 
-                if (window.firebaseDB && currentUserId) {
+                if (window.firebaseDB && currentUserId && window.firebaseModules.auth && window.firebaseModules.auth.currentUser) {
                     const { doc, updateDoc } = window.firebaseModules;
                     updateDoc(doc(window.firebaseDB, 'users', currentUserId), { name: currentUser }).catch(e => window.handleFirestoreError(e, 'update', 'users'));
                 }
@@ -1247,6 +1263,10 @@
         function handleProfilePhotoUpload(event) {
             const file = event.target.files[0];
             if (file) {
+                if (file.size > 700000) {
+                    showModal("Profile photo is too large. Please select a smaller image (max ~700KB).");
+                    return;
+                }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     profilePhoto = e.target.result;
@@ -1256,7 +1276,7 @@
                     img.src = profilePhoto;
                     img.classList.remove('hidden');
                     
-                    if (window.firebaseDB && currentUserId) {
+                    if (window.firebaseDB && currentUserId && window.firebaseModules.auth && window.firebaseModules.auth.currentUser) {
                         const { doc, updateDoc } = window.firebaseModules;
                         updateDoc(doc(window.firebaseDB, 'users', currentUserId), { profilePhoto: profilePhoto }).catch(e => window.handleFirestoreError(e, 'update', 'users'));
                     }
@@ -1576,6 +1596,12 @@
 
         document.getElementById('bookingForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            
+            if (window.firebaseModules && (!window.firebaseModules.auth || !window.firebaseModules.auth.currentUser)) {
+                showModal("Please log in to book an appointment.");
+                return;
+            }
+
             const id = document.getElementById('bookingWorkshopId').value;
             const name = document.getElementById('bookingUserName').value;
             const phone = document.getElementById('bookingUserPhone').value;
@@ -1584,7 +1610,10 @@
             const serviceType = document.getElementById('bookingServiceType').value;
             const vehicle = document.getElementById('bookingVehicle').value;
 
-            const newBooking = { id: Date.now().toString(), userId: currentUserId, userName: name, phone, workshopId: id, date, time, serviceType, vehicle, status: 'Pending', createdAt: new Date().toISOString() };
+            const workshop = allWorkshops.find(w => w.id === id);
+            const workshopOwnerId = workshop ? workshop.ownerId : '';
+
+            const newBooking = { id: Date.now().toString(), userId: currentUserId, userName: name, phone, workshopId: id, workshopOwnerId, date, time, serviceType, vehicle, status: 'Pending', createdAt: new Date().toISOString() };
             
             if (window.firebaseDB) {
                 const { doc, setDoc } = window.firebaseModules;
@@ -1673,6 +1702,12 @@
 
         function submitReview(event, workshopId) {
             event.preventDefault();
+
+            if (window.firebaseModules && (!window.firebaseModules.auth || !window.firebaseModules.auth.currentUser)) {
+                showModal("Please log in to submit a review.");
+                return;
+            }
+
             const rating = parseInt(document.getElementById('reviewRating').value);
             const text = document.getElementById('reviewText').value;
             
@@ -1863,15 +1898,7 @@
             `;
 
             ownedWorkshops.forEach(w => {
-                let savesCount = localStorage.getItem('saves_' + w.id);
-                if (!savesCount) {
-                    savesCount = Math.floor(Math.random() * 50) + 10;
-                    localStorage.setItem('saves_' + w.id, savesCount);
-                    if (window.firebaseDB) {
-                        const { doc, updateDoc } = window.firebaseModules;
-                        updateDoc(doc(window.firebaseDB, 'workshops', w.id), { savesCount: parseInt(savesCount) }).catch(e => window.handleFirestoreError(e, 'update', 'workshops'));
-                    }
-                }
+                let savesCount = w.savesCount || 0;
                 const isOpen = localStorage.getItem('status_' + w.id) !== 'closed';
                 const wBookings = bookings.filter(b => b.workshopId === w.id);
                 const wReviews = reviewsDB[w.id] || [];

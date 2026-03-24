@@ -54,6 +54,7 @@
         "id": { "type": "string", "description": "Booking ID" },
         "userId": { "type": "string", "description": "UID of the user making the booking" },
         "workshopId": { "type": "string", "description": "ID of the workshop" },
+        "workshopOwnerId": { "type": "string", "description": "ID of the workshop owner" },
         "userName": { "type": "string", "description": "Name of the user" },
         "phone": { "type": "string", "description": "Contact phone for the booking" },
         "date": { "type": "string", "description": "Date of the appointment" },
@@ -63,7 +64,7 @@
         "status": { "type": "string", "enum": ["Pending", "Confirmed", "Completed", "Cancelled"], "description": "Status of the booking" },
         "createdAt": { "type": "string", "format": "date-time", "description": "When the booking was created" }
       },
-      "required": ["id", "userId", "workshopId", "userName", "phone", "date", "time", "serviceType", "vehicle", "status", "createdAt"]
+      "required": ["id", "userId", "workshopId", "workshopOwnerId", "userName", "phone", "date", "time", "serviceType", "vehicle", "status", "createdAt"]
     },
     "Review": {
       "title": "Review",

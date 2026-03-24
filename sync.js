@@ -106,13 +106,10 @@ function initFirebaseSync() {
 
         // 2. Listen to bookings for user's workshops
         if (userWorkshops.length > 0) {
-            for (let i = 0; i < userWorkshops.length; i += 10) {
-                const chunk = userWorkshops.slice(i, i + 10);
-                const qWorkshop = query(collection(db, 'bookings'), where('workshopId', 'in', chunk));
-                bookingsUnsubscribes.push(onSnapshot(qWorkshop, handleSnapshot, (error) => {
-                    window.handleFirestoreError(error, 'list', 'bookings');
-                }));
-            }
+            const qWorkshop = query(collection(db, 'bookings'), where('workshopOwnerId', '==', user.uid));
+            bookingsUnsubscribes.push(onSnapshot(qWorkshop, handleSnapshot, (error) => {
+                window.handleFirestoreError(error, 'list', 'bookings');
+            }));
         }
     };
 

@@ -41,6 +41,7 @@ service cloud.firestore {
     //   - id: string (required)
     //   - userId: string (required)
     //   - workshopId: string (required)
+    //   - workshopOwnerId: string (required)
     //   - userName: string (required)
     //   - phone: string (required)
     //   - date: string (required)
@@ -177,33 +178,35 @@ service cloud.firestore {
     }
 
     function isValidBooking(data) {
-      return hasRequiredFields(['id', 'userId', 'workshopId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
-             hasOnlyAllowedFields(['id', 'userId', 'workshopId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
+      return hasRequiredFields(['id', 'userId', 'workshopId', 'workshopOwnerId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'userId', 'workshopId', 'workshopOwnerId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
              validStringLength('id', 1, 100) &&
              data.userId == request.auth.uid &&
              validStringLength('workshopId', 1, 100) &&
+             validStringLength('workshopOwnerId', 0, 100) &&
              validStringLength('userName', 1, 100) &&
              validStringLength('phone', 5, 20) &&
              validStringLength('date', 1, 20) &&
              validStringLength('time', 1, 20) &&
              validStringLength('serviceType', 1, 100) &&
-             validStringLength('vehicle', 1, 100) &&
+             validStringLength('vehicle', 0, 100) &&
              data.status in ['Pending', 'Confirmed', 'Completed', 'Cancelled'] &&
              validStringLength('createdAt', 1, 50);
     }
 
     function isValidBookingUpdate(data) {
-      return hasRequiredFields(['id', 'userId', 'workshopId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
-             hasOnlyAllowedFields(['id', 'userId', 'workshopId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
+      return hasRequiredFields(['id', 'userId', 'workshopId', 'workshopOwnerId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
+             hasOnlyAllowedFields(['id', 'userId', 'workshopId', 'workshopOwnerId', 'userName', 'phone', 'date', 'time', 'serviceType', 'vehicle', 'status', 'createdAt']) &&
              data.id == resource.data.id && // id cannot change
              data.userId == resource.data.userId && // userId cannot change
              data.workshopId == resource.data.workshopId && // workshopId cannot change
+             data.workshopOwnerId == resource.data.workshopOwnerId && // workshopOwnerId cannot change
              validStringLength('userName', 1, 100) &&
              validStringLength('phone', 5, 20) &&
              validStringLength('date', 1, 20) &&
              validStringLength('time', 1, 20) &&
              validStringLength('serviceType', 1, 100) &&
-             validStringLength('vehicle', 1, 100) &&
+             validStringLength('vehicle', 0, 100) &&
              data.status in ['Pending', 'Confirmed', 'Completed', 'Cancelled'] &&
              data.createdAt == resource.data.createdAt; // createdAt cannot change
     }
@@ -258,15 +261,13 @@ service cloud.firestore {
     match /bookings/{bookingId} {
       allow read: if isDocOwner() || isAdmin() || (
         // Workshop owner can read bookings for their workshop
-        isAuthenticated() && exists(/databases/$(database)/documents/workshops/$(resource.data.workshopId)) &&
-        get(/databases/$(database)/documents/workshops/$(resource.data.workshopId)).data.ownerId == request.auth.uid
+        isAuthenticated() && resource.data.workshopOwnerId == request.auth.uid
       );
       allow create: if isAuthenticated() && isValidBooking(request.resource.data);
       allow update: if isAuthenticated() && isValidBookingUpdate(request.resource.data) && (
         isDocOwner() || isAdmin() || (
           // Workshop owner can update status
-          exists(/databases/$(database)/documents/workshops/$(resource.data.workshopId)) &&
-          get(/databases/$(database)/documents/workshops/$(resource.data.workshopId)).data.ownerId == request.auth.uid &&
+          resource.data.workshopOwnerId == request.auth.uid &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
         )
       );
