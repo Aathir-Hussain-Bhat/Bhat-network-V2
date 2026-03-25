@@ -213,7 +213,15 @@ window.loginWithGoogle = function() {
         })
         .catch((error) => {
             console.error("Login error", error);
-            if (window.showModal) window.showModal("Login failed: " + error.message);
+            let errorMsg = "Login failed: " + error.message;
+            if (error.code === 'auth/network-request-failed') {
+                errorMsg = "Network error during login. This is often caused by ad blockers (like uBlock Origin), strict privacy settings (like Brave Shields), or blocked third-party cookies. Please try disabling your ad blocker for this site, or open the app in a new tab.";
+            } else if (error.code === 'auth/popup-closed-by-user') {
+                errorMsg = "Login popup was closed before completing. Please try again.";
+            } else if (error.code === 'auth/unauthorized-domain') {
+                errorMsg = "This domain is not authorized for Firebase Auth. Please add it in the Firebase Console.";
+            }
+            if (window.showModal) window.showModal(errorMsg);
         });
 };
 
