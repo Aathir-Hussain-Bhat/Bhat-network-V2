@@ -453,10 +453,34 @@
                         <i class="fab fa-google"></i>
                     </div>
                     <h3 class="text-xl font-serif font-medium mb-4 text-bhat-ink dark:text-bhat-darkInk">Sign In</h3>
-                    <p class="text-sm text-stone-500 dark:text-stone-400 mb-6">Sign in with Google to access your dashboard and profile.</p>
-                    <button onclick="loginWithGoogle()" class="w-full ripple btn-dark bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-all shadow-md flex items-center justify-center gap-2">
+                    <p class="text-sm text-stone-500 dark:text-stone-400 mb-6">Sign in to access your dashboard and profile.</p>
+                    
+                    <button onclick="loginWithGoogle()" class="w-full ripple btn-dark bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink font-medium text-sm p-4 rounded-2xl hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-all shadow-md flex items-center justify-center gap-2 mb-4">
                         <i class="fab fa-google"></i> Continue with Google
                     </button>
+
+                    <div class="relative flex items-center py-2 mb-4">
+                        <div class="flex-grow border-t border-stone-200 dark:border-stone-700"></div>
+                        <span class="flex-shrink-0 mx-4 text-stone-400 text-xs uppercase tracking-wider">Or</span>
+                        <div class="flex-grow border-t border-stone-200 dark:border-stone-700"></div>
+                    </div>
+
+                    <div id="phoneLoginSection" class="text-left">
+                        <label class="block text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-2">Phone Number</label>
+                        <div class="flex gap-2 mb-4">
+                            <input type="tel" id="phoneNumberInput" placeholder="+1234567890" class="w-full p-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-bhat-ink dark:focus:ring-bhat-darkAccent dark:text-white transition-all">
+                            <button onclick="sendPhoneCode()" id="sendCodeBtn" class="bg-stone-200 dark:bg-stone-700 text-bhat-ink dark:text-white px-4 rounded-xl text-sm font-medium hover:bg-stone-300 dark:hover:bg-stone-600 transition-colors whitespace-nowrap">Send Code</button>
+                        </div>
+                        <div id="recaptcha-container" class="mb-4"></div>
+                    </div>
+
+                    <div id="otpSection" class="text-left hidden">
+                        <label class="block text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-2">Verification Code</label>
+                        <div class="flex gap-2 mb-4">
+                            <input type="text" id="otpInput" placeholder="123456" class="w-full p-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-bhat-ink dark:focus:ring-bhat-darkAccent dark:text-white transition-all">
+                            <button onclick="verifyPhoneCode()" id="verifyCodeBtn" class="bg-bhat-ink dark:bg-bhat-darkAccent text-white dark:text-bhat-ink px-4 rounded-xl text-sm font-medium hover:bg-stone-800 dark:hover:bg-[#00e6b8] transition-colors whitespace-nowrap">Verify</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="dashboardContent" class="hidden space-y-8" data-aos="fade-up">

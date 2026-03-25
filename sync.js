@@ -138,7 +138,7 @@ function initFirebaseSync() {
             window.currentUserId = user.uid;
             window.profilePhoto = user.photoURL;
             window.mechanicLoggedIn = true; // For simplicity, any logged in user can be a mechanic
-            window.mechanicPhone = user.phoneNumber || user.email; // Use email as fallback identifier
+            window.mechanicPhone = user.phoneNumber || user.email || ''; // Use email as fallback identifier
             
             localStorage.setItem('bhat_user', window.currentUser);
             localStorage.setItem('bhat_user_id', window.currentUserId);
@@ -161,9 +161,10 @@ function initFirebaseSync() {
             getDoc(doc(db, 'users', user.uid)).then(userDoc => {
                 const userData = {
                     name: window.currentUser,
-                    email: user.email,
                     followedWorkshops: window.followedWorkshops || []
                 };
+                if (user.email) userData.email = user.email;
+                if (user.phoneNumber) userData.phoneNumber = user.phoneNumber;
                 if (window.profilePhoto) {
                     userData.profilePhoto = window.profilePhoto;
                 }
@@ -223,6 +224,87 @@ window.loginWithGoogle = function() {
             }
             if (window.showModal) window.showModal(errorMsg);
         });
+};
+
+window.sendPhoneCode = function() {
+    if (!window.firebaseAuth) return;
+    const phoneNumber = document.getElementById('phoneNumberInput').value;
+    if (!phoneNumber) {
+        if (window.showModal) window.showModal("Please enter a valid phone number with country code (e.g., +1234567890).");
+        return;
+    }
+
+    const { RecaptchaVerifier, signInWithPhoneNumber } = window.firebaseModules;
+    
+    if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(window.firebaseAuth, 'recaptcha-container', {
+            'size': 'invisible',
+            'callback': (response) => {
+                // reCAPTCHA solved, allow signInWithPhoneNumber.
+            }
+        });
+    }
+
+    const btn = document.getElementById('sendCodeBtn');
+    const originalText = btn.textContent;
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    signInWithPhoneNumber(window.firebaseAuth, phoneNumber, window.recaptchaVerifier)
+        .then((confirmationResult) => {
+            window.confirmationResult = confirmationResult;
+            document.getElementById('phoneLoginSection').classList.add('hidden');
+            document.getElementById('otpSection').classList.remove('hidden');
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }).catch((error) => {
+            console.error("SMS error", error);
+            btn.textContent = originalText;
+            btn.disabled = false;
+            let errorMsg = "Failed to send SMS: " + error.message;
+            if (error.code === 'auth/operation-not-allowed') {
+                errorMsg = "Phone authentication is not enabled. Please enable it in the Firebase Console.";
+            } else if (error.code === 'auth/invalid-phone-number') {
+                errorMsg = "Invalid phone number format. Please include the country code (e.g., +1234567890).";
+            }
+            if (window.showModal) window.showModal(errorMsg);
+            
+            // Reset recaptcha if it fails
+            if (window.recaptchaVerifier) {
+                window.recaptchaVerifier.render().then(function(widgetId) {
+                    grecaptcha.reset(widgetId);
+                });
+            }
+        });
+};
+
+window.verifyPhoneCode = function() {
+    const code = document.getElementById('otpInput').value;
+    if (!code) return;
+
+    const btn = document.getElementById('verifyCodeBtn');
+    const originalText = btn.textContent;
+    btn.textContent = 'Verifying...';
+    btn.disabled = true;
+
+    window.confirmationResult.confirm(code).then((result) => {
+        console.log("Logged in with phone", result.user);
+        document.getElementById('dashboardLogin').classList.add('hidden');
+        document.getElementById('dashboardContent').classList.remove('hidden');
+        
+        // Reset UI for next time
+        document.getElementById('phoneLoginSection').classList.remove('hidden');
+        document.getElementById('otpSection').classList.add('hidden');
+        document.getElementById('phoneNumberInput').value = '';
+        document.getElementById('otpInput').value = '';
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }).catch((error) => {
+        console.error("OTP verification error", error);
+        btn.textContent = originalText;
+        btn.disabled = false;
+        if (window.showModal) window.showModal("Invalid verification code. Please try again.");
+    });
 };
 
 window.logoutFromGoogle = function() {

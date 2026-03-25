@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getFirestore, collection, getDocs, getDoc, addDoc, updateDoc, doc, onSnapshot, setDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
 const firebaseConfig = {
     projectId: "bhatech",
@@ -22,7 +22,7 @@ window.firebaseAuth = auth;
 window.firebaseProvider = provider;
 window.firebaseModules = {
     collection, getDocs, getDoc, addDoc, updateDoc, doc, onSnapshot, setDoc, deleteDoc, query, where,
-    signInWithPopup, onAuthStateChanged, signOut
+    signInWithPopup, onAuthStateChanged, signOut, RecaptchaVerifier, signInWithPhoneNumber
 };
 
 window.handleFirestoreError = function(error, operationType, path) {
