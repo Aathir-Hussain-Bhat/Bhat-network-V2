@@ -26,21 +26,18 @@ function initFirebaseSync() {
             }
         });
         
-        // Merge with defaultWorkshopsDB
-        // We will just use fbWorkshops if it has data, otherwise we'll upload defaultWorkshopsDB
         if (fbWorkshops.length === 0 && window.defaultWorkshopsDB) {
-            window.defaultWorkshopsDB.forEach(w => {
-                setDoc(doc(db, 'workshops', w.id), w).catch(e => window.handleFirestoreError(e, 'create', 'workshops'));
-            });
+            window.allWorkshops = window.defaultWorkshopsDB;
+            localStorage.setItem('bhat_workshops_db', JSON.stringify(window.defaultWorkshopsDB));
         } else {
             window.allWorkshops = fbWorkshops;
             localStorage.setItem('bhat_workshops_db', JSON.stringify(fbWorkshops));
-            if (window.setupBookingsListeners) window.setupBookingsListeners();
-            if (window.renderWorkshops) {
-                window.renderWorkshops(window.allWorkshops);
-                window.renderDashboard();
-                window.updateFeaturedWorkshopDOM();
-            }
+        }
+        if (window.setupBookingsListeners) window.setupBookingsListeners();
+        if (window.renderWorkshops) {
+            window.renderWorkshops(window.allWorkshops);
+            window.renderDashboard();
+            window.updateFeaturedWorkshopDOM();
         }
     }, (error) => {
         window.handleFirestoreError(error, 'list', 'workshops');

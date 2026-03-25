@@ -902,7 +902,7 @@
             document.getElementById('addWorkshopForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                if (window.firebaseModules && (!window.firebaseModules.auth || !window.firebaseModules.auth.currentUser)) {
+                if (window.firebaseModules && (!window.firebaseAuth || !window.firebaseAuth.currentUser)) {
                     showModal("Please log in to register a workshop.");
                     return;
                 }
@@ -946,7 +946,7 @@
                     id: 'user-ws-' + Date.now(),
                     name: document.getElementById('wName').value,
                     owner: document.getElementById('wOwner').value,
-                    ownerId: window.firebaseModules && window.firebaseModules.auth.currentUser ? window.firebaseModules.auth.currentUser.uid : (currentUserId || 'guest'),
+                    ownerId: window.firebaseModules && window.firebaseAuth && window.firebaseAuth.currentUser ? window.firebaseAuth.currentUser.uid : (currentUserId || 'guest'),
                     phone: document.getElementById('wPhone').value,
                     location: document.getElementById('wLocation').value,
                     address: document.getElementById('wLocation').value,
@@ -1090,7 +1090,7 @@
             }
             localStorage.setItem('bhat_followed', JSON.stringify(followedWorkshops));
             
-            if (window.firebaseDB && currentUserId && window.firebaseModules.auth && window.firebaseModules.auth.currentUser) {
+            if (window.firebaseDB && currentUserId && window.firebaseAuth && window.firebaseAuth.currentUser) {
                 const { doc, updateDoc } = window.firebaseModules;
                 updateDoc(doc(window.firebaseDB, 'users', currentUserId), { followedWorkshops }).catch(e => window.handleFirestoreError(e, 'update', 'users'));
             }
@@ -1208,7 +1208,7 @@
                 localStorage.setItem('bhat_user', currentUser);
                 document.getElementById('profileNameDisplay').textContent = currentUser;
                 
-                if (window.firebaseDB && currentUserId && window.firebaseModules.auth && window.firebaseModules.auth.currentUser) {
+                if (window.firebaseDB && currentUserId && window.firebaseAuth && window.firebaseAuth.currentUser) {
                     const { doc, updateDoc } = window.firebaseModules;
                     updateDoc(doc(window.firebaseDB, 'users', currentUserId), { name: currentUser }).catch(e => window.handleFirestoreError(e, 'update', 'users'));
                 }
@@ -1276,7 +1276,7 @@
                     img.src = profilePhoto;
                     img.classList.remove('hidden');
                     
-                    if (window.firebaseDB && currentUserId && window.firebaseModules.auth && window.firebaseModules.auth.currentUser) {
+                    if (window.firebaseDB && currentUserId && window.firebaseAuth && window.firebaseAuth.currentUser) {
                         const { doc, updateDoc } = window.firebaseModules;
                         updateDoc(doc(window.firebaseDB, 'users', currentUserId), { profilePhoto: profilePhoto }).catch(e => window.handleFirestoreError(e, 'update', 'users'));
                     }
@@ -1597,7 +1597,7 @@
         document.getElementById('bookingForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
-            if (window.firebaseModules && (!window.firebaseModules.auth || !window.firebaseModules.auth.currentUser)) {
+            if (window.firebaseModules && (!window.firebaseAuth || !window.firebaseAuth.currentUser)) {
                 showModal("Please log in to book an appointment.");
                 return;
             }
@@ -1703,7 +1703,7 @@
         function submitReview(event, workshopId) {
             event.preventDefault();
 
-            if (window.firebaseModules && (!window.firebaseModules.auth || !window.firebaseModules.auth.currentUser)) {
+            if (window.firebaseModules && (!window.firebaseAuth || !window.firebaseAuth.currentUser)) {
                 showModal("Please log in to submit a review.");
                 return;
             }
