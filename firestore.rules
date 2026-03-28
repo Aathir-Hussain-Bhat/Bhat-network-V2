@@ -86,8 +86,8 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() && (
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-        (request.auth.token.email == "aathirhussain019@gmail.com" && request.auth.token.email_verified == true)
+        ('email' in request.auth.token && request.auth.token.email == "aathirhussain019@gmail.com" && request.auth.token.email_verified == true) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
     }
 
@@ -111,7 +111,7 @@ service cloud.firestore {
     }
 
     function isValidOptionalString(field, minLen, maxLen) {
-      return !(field in request.resource.data) ||
+      return !(field in request.resource.data) || request.resource.data[field] == null || request.resource.data[field] == '' ||
              (request.resource.data[field] is string &&
               request.resource.data[field].size() >= minLen &&
               request.resource.data[field].size() <= maxLen);
@@ -127,10 +127,10 @@ service cloud.firestore {
     // ===============================================================
 
     function isValidUser(data) {
-      return hasRequiredFields(['name', 'email', 'role']) &&
+      return hasRequiredFields(['name', 'role']) &&
              hasOnlyAllowedFields(['name', 'email', 'phone', 'profilePhoto', 'role', 'followedWorkshops']) &&
              validStringLength('name', 1, 100) &&
-             isValidEmail(data.email) &&
+             (!( 'email' in data ) || data.email == null || data.email == '' || isValidEmail(data.email)) &&
              isValidOptionalString('phone', 5, 20) &&
              isValidOptionalString('profilePhoto', 0, 1048576) &&
              data.role in ['user', 'mechanic', 'admin'] &&
@@ -141,39 +141,38 @@ service cloud.firestore {
       return hasRequiredFields(['id', 'name', 'owner', 'ownerId', 'phone', 'address', 'location', 'services', 'rating', 'reviewsCount', 'image', 'isOpen', 'savesCount']) &&
              hasOnlyAllowedFields(['id', 'name', 'owner', 'ownerId', 'phone', 'address', 'location', 'services', 'rating', 'reviewsCount', 'image', 'gallery', 'isOpen', 'savesCount', 'links']) &&
              validStringLength('id', 1, 100) &&
-             validStringLength('name', 1, 100) &&
-             validStringLength('owner', 1, 100) &&
-             data.ownerId == request.auth.uid &&
-             validStringLength('phone', 5, 20) &&
-             validStringLength('address', 1, 200) &&
-             validStringLength('location', 1, 200) &&
-             isValidList('services', 20) &&
-             data.rating is number && data.rating >= 0 && data.rating <= 5 &&
-             data.reviewsCount is number && data.reviewsCount >= 0 &&
-             validStringLength('image', 0, 1048576) &&
-             isValidList('gallery', 20) &&
-             data.isOpen is bool &&
-             data.savesCount is number && data.savesCount >= 0 &&
+             validStringLength('name', 1, 200) &&
+             validStringLength('owner', 1, 200) &&
+             (data.ownerId == request.auth.uid || isAdmin()) &&
+             validStringLength('phone', 1, 50) &&
+             validStringLength('address', 1, 500) &&
+             validStringLength('location', 1, 500) &&
+             isValidList('services', 50) &&
+             (data.rating is number || data.rating is string) &&
+             (data.reviewsCount is number || data.reviewsCount is string) &&
+             validStringLength('image', 0, 2000000) &&
+             isValidList('gallery', 50) &&
+             (data.isOpen is bool || data.isOpen is string) &&
+             (data.savesCount is number || data.savesCount is string) &&
              (!( 'links' in data ) || data.links is map);
     }
 
     function isValidWorkshopUpdate(data) {
-      return hasRequiredFields(['id', 'name', 'owner', 'ownerId', 'phone', 'address', 'location', 'services', 'rating', 'reviewsCount', 'image', 'isOpen', 'savesCount']) &&
-             hasOnlyAllowedFields(['id', 'name', 'owner', 'ownerId', 'phone', 'address', 'location', 'services', 'rating', 'reviewsCount', 'image', 'gallery', 'isOpen', 'savesCount', 'links']) &&
-             data.id == resource.data.id && // id cannot change
-             validStringLength('name', 1, 100) &&
-             validStringLength('owner', 1, 100) &&
-             data.ownerId == resource.data.ownerId && // ownerId cannot change
-             validStringLength('phone', 5, 20) &&
-             validStringLength('address', 1, 200) &&
-             validStringLength('location', 1, 200) &&
-             isValidList('services', 20) &&
-             data.rating is number && data.rating >= 0 && data.rating <= 5 &&
-             data.reviewsCount is number && data.reviewsCount >= 0 &&
-             validStringLength('image', 0, 1048576) &&
-             isValidList('gallery', 20) &&
-             data.isOpen is bool &&
-             data.savesCount is number && data.savesCount >= 0 &&
+      return (resource.data.ownerId == request.auth.uid || isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['savesCount', 'rating', 'reviewsCount'])) &&
+             (!( 'id' in data ) || data.id == resource.data.id) && // id cannot change
+             (!( 'name' in data ) || validStringLength('name', 1, 200)) &&
+             (!( 'owner' in data ) || validStringLength('owner', 1, 200)) &&
+             (!( 'ownerId' in data ) || data.ownerId == resource.data.ownerId || isAdmin()) && // ownerId cannot change unless admin
+             (!( 'phone' in data ) || validStringLength('phone', 1, 50)) &&
+             (!( 'address' in data ) || validStringLength('address', 1, 500)) &&
+             (!( 'location' in data ) || validStringLength('location', 1, 500)) &&
+             (!( 'services' in data ) || isValidList('services', 50)) &&
+             (!( 'rating' in data ) || (data.rating is number || data.rating is string)) &&
+             (!( 'reviewsCount' in data ) || (data.reviewsCount is number || data.reviewsCount is string)) &&
+             (!( 'image' in data ) || validStringLength('image', 0, 2000000)) &&
+             (!( 'gallery' in data ) || isValidList('gallery', 50)) &&
+             (!( 'isOpen' in data ) || (data.isOpen is bool || data.isOpen is string)) &&
+             (!( 'savesCount' in data ) || (data.savesCount is number || data.savesCount is string)) &&
              (!( 'links' in data ) || data.links is map);
     }
 
@@ -244,7 +243,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
       allow create: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == 'user' || isAdmin());
-      allow update: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == resource.data.role || isAdmin());
+      allow update: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == resource.data.role || (!('role' in resource.data) && request.resource.data.role == 'user') || isAdmin());
       allow delete: if isAdmin();
     }
 

@@ -38,6 +38,7 @@ function initFirebaseSync() {
             window.renderWorkshops(window.allWorkshops);
             window.renderDashboard();
             window.updateFeaturedWorkshopDOM();
+            if (window.updateAddTabVisibility) window.updateAddTabVisibility();
         }
     }, (error) => {
         window.handleFirestoreError(error, 'list', 'workshops');
@@ -137,14 +138,16 @@ function initFirebaseSync() {
             window.currentUser = user.displayName || 'User';
             window.currentUserId = user.uid;
             window.profilePhoto = user.photoURL;
-            window.mechanicLoggedIn = true; // For simplicity, any logged in user can be a mechanic
-            window.mechanicPhone = user.phoneNumber || user.email || ''; // Use email as fallback identifier
+            window.userLoggedIn = true; // For simplicity, any logged in user can be a mechanic
+            window.userEmail = user.email || ''; // Use email as identifier
             
             localStorage.setItem('bhat_user', window.currentUser);
             localStorage.setItem('bhat_user_id', window.currentUserId);
-            localStorage.setItem('bhat_mechanic_logged_in', 'true');
-            localStorage.setItem('bhat_mechanic_phone', window.mechanicPhone);
-            if (window.profilePhoto) localStorage.setItem('bhat_profile_photo', window.profilePhoto);
+            localStorage.setItem('bhat_user_logged_in', 'true');
+            localStorage.setItem('bhat_user_email', window.userEmail);
+            if (window.profilePhoto) {
+                localStorage.setItem('bhat_profile_photo', window.profilePhoto);
+            }
             
             document.getElementById('profileNameDisplay').textContent = window.currentUser;
             if (window.profilePhoto) {
@@ -161,15 +164,15 @@ function initFirebaseSync() {
             getDoc(doc(db, 'users', user.uid)).then(userDoc => {
                 const userData = {
                     name: window.currentUser,
-                    followedWorkshops: window.followedWorkshops || []
+                    followedWorkshops: Array.isArray(window.followedWorkshops) ? window.followedWorkshops : []
                 };
                 if (user.email) userData.email = user.email;
-                if (user.phoneNumber) userData.phoneNumber = user.phoneNumber;
+                if (user.phoneNumber) userData.phone = user.phoneNumber;
                 if (window.profilePhoto) {
                     userData.profilePhoto = window.profilePhoto;
                 }
-                if (!userDoc.exists()) {
-                    userData.role = 'user'; // Only set role on creation
+                if (!userDoc.exists() || !userDoc.data().role) {
+                    userData.role = 'user';
                 }
                 setDoc(doc(db, 'users', user.uid), userData, { merge: true }).catch(e => window.handleFirestoreError(e, 'update', 'users'));
             }).catch(e => window.handleFirestoreError(e, 'get', 'users'));
@@ -178,13 +181,13 @@ function initFirebaseSync() {
             window.currentUser = 'Guest User';
             window.currentUserId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             window.profilePhoto = null;
-            window.mechanicLoggedIn = false;
-            window.mechanicPhone = '';
+            window.userLoggedIn = false;
+            window.userEmail = '';
             
             localStorage.removeItem('bhat_user');
             localStorage.setItem('bhat_user_id', window.currentUserId);
-            localStorage.setItem('bhat_mechanic_logged_in', 'false');
-            localStorage.setItem('bhat_mechanic_phone', '');
+            localStorage.setItem('bhat_user_logged_in', 'false');
+            localStorage.setItem('bhat_user_email', '');
             localStorage.removeItem('bhat_profile_photo');
             
             document.getElementById('profileNameDisplay').textContent = window.currentUser;
@@ -198,113 +201,39 @@ function initFirebaseSync() {
         if (window.updateAddTabVisibility) window.updateAddTabVisibility();
         if (window.renderDashboard) window.renderDashboard();
         if (window.renderMyBookings) window.renderMyBookings();
+        if (window.renderAddWorkshop) window.renderAddWorkshop();
     });
 }
 
 // Expose Google Login
+let isLoggingIn = false;
 window.loginWithGoogle = function() {
-    if (!window.firebaseAuth) return;
+    if (!window.firebaseAuth || isLoggingIn) return;
+    isLoggingIn = true;
     const { signInWithPopup } = window.firebaseModules;
     signInWithPopup(window.firebaseAuth, window.firebaseProvider)
         .then((result) => {
+            isLoggingIn = false;
             console.log("Logged in", result.user);
             // Close login modal if open
             document.getElementById('dashboardLogin').classList.add('hidden');
             document.getElementById('dashboardContent').classList.remove('hidden');
         })
         .catch((error) => {
+            isLoggingIn = false;
             console.error("Login error", error);
             let errorMsg = "Login failed: " + error.message;
             if (error.code === 'auth/network-request-failed') {
-                errorMsg = "Network error during login. This is often caused by ad blockers (like uBlock Origin), strict privacy settings (like Brave Shields), or blocked third-party cookies. Please try disabling your ad blocker for this site, or open the app in a new tab.";
+                errorMsg = `Network error during login. This is often caused by ad blockers, strict privacy settings, or blocked third-party cookies in this preview window.<br><br><b>To fix this:</b><br>1. <a href="${window.location.href}" target="_blank" class="text-blue-500 underline">Open the app in a new tab</a><br>2. Disable any ad blockers for this site.<br>3. If you restricted your Firebase API Key, ensure these domains are allowed:<br><code class="text-xs bg-gray-100 p-1 rounded">ais-dev-57uzjgethkzegh55g3yewd-678661993153.asia-southeast1.run.app</code><br><code class="text-xs bg-gray-100 p-1 rounded">ais-pre-57uzjgethkzegh55g3yewd-678661993153.asia-southeast1.run.app</code>`;
             } else if (error.code === 'auth/popup-closed-by-user') {
                 errorMsg = "Login popup was closed before completing. Please try again.";
+            } else if (error.code === 'auth/cancelled-popup-request') {
+                errorMsg = "Multiple login attempts detected. Please wait for the previous popup to close or try again.";
             } else if (error.code === 'auth/unauthorized-domain') {
                 errorMsg = "This domain is not authorized for Firebase Auth. Please add it in the Firebase Console.";
             }
             if (window.showModal) window.showModal(errorMsg);
         });
-};
-
-window.sendPhoneCode = function() {
-    if (!window.firebaseAuth) return;
-    const phoneNumber = document.getElementById('phoneNumberInput').value;
-    if (!phoneNumber) {
-        if (window.showModal) window.showModal("Please enter a valid phone number with country code (e.g., +1234567890).");
-        return;
-    }
-
-    const { RecaptchaVerifier, signInWithPhoneNumber } = window.firebaseModules;
-    
-    if (!window.recaptchaVerifier) {
-        window.recaptchaVerifier = new RecaptchaVerifier(window.firebaseAuth, 'recaptcha-container', {
-            'size': 'invisible',
-            'callback': (response) => {
-                // reCAPTCHA solved, allow signInWithPhoneNumber.
-            }
-        });
-    }
-
-    const btn = document.getElementById('sendCodeBtn');
-    const originalText = btn.textContent;
-    btn.textContent = 'Sending...';
-    btn.disabled = true;
-
-    signInWithPhoneNumber(window.firebaseAuth, phoneNumber, window.recaptchaVerifier)
-        .then((confirmationResult) => {
-            window.confirmationResult = confirmationResult;
-            document.getElementById('phoneLoginSection').classList.add('hidden');
-            document.getElementById('otpSection').classList.remove('hidden');
-            btn.textContent = originalText;
-            btn.disabled = false;
-        }).catch((error) => {
-            console.error("SMS error", error);
-            btn.textContent = originalText;
-            btn.disabled = false;
-            let errorMsg = "Failed to send SMS: " + error.message;
-            if (error.code === 'auth/operation-not-allowed') {
-                errorMsg = "Phone authentication is not enabled. Please enable it in the Firebase Console.";
-            } else if (error.code === 'auth/invalid-phone-number') {
-                errorMsg = "Invalid phone number format. Please include the country code (e.g., +1234567890).";
-            }
-            if (window.showModal) window.showModal(errorMsg);
-            
-            // Reset recaptcha if it fails
-            if (window.recaptchaVerifier) {
-                window.recaptchaVerifier.render().then(function(widgetId) {
-                    grecaptcha.reset(widgetId);
-                });
-            }
-        });
-};
-
-window.verifyPhoneCode = function() {
-    const code = document.getElementById('otpInput').value;
-    if (!code) return;
-
-    const btn = document.getElementById('verifyCodeBtn');
-    const originalText = btn.textContent;
-    btn.textContent = 'Verifying...';
-    btn.disabled = true;
-
-    window.confirmationResult.confirm(code).then((result) => {
-        console.log("Logged in with phone", result.user);
-        document.getElementById('dashboardLogin').classList.add('hidden');
-        document.getElementById('dashboardContent').classList.remove('hidden');
-        
-        // Reset UI for next time
-        document.getElementById('phoneLoginSection').classList.remove('hidden');
-        document.getElementById('otpSection').classList.add('hidden');
-        document.getElementById('phoneNumberInput').value = '';
-        document.getElementById('otpInput').value = '';
-        btn.textContent = originalText;
-        btn.disabled = false;
-    }).catch((error) => {
-        console.error("OTP verification error", error);
-        btn.textContent = originalText;
-        btn.disabled = false;
-        if (window.showModal) window.showModal("Invalid verification code. Please try again.");
-    });
 };
 
 window.logoutFromGoogle = function() {
